@@ -6,11 +6,12 @@
     "configurations": [
         {
             "name": "Start Server",
-            "type": "go",
+           "type": "go",
             "request": "launch",
-            "mode": "auto",
-            "program": "./server/main.go",
-            "console": "integratedTerminal"
+            "mode": "debug",
+            "program": "./server",
+            "console": "integratedTerminal",
+            "envFile": "/workspaces/jarvis/dev.env"
         }
     ]
 }

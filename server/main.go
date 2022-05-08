@@ -2,29 +2,24 @@ package main
 
 import (
 	"fmt"
-	"net/http"
+	"log"
 	"os"
-
-	"github.com/gin-gonic/gin"
 )
 
-func setupRouter() *gin.Engine {
-	r := gin.Default()
-
-	// Health Endpoint
-	r.GET("/health", func(c *gin.Context) {
-		c.String(http.StatusOK, "healthy")
-	})
-
-	return r
-}
-
 func main() {
-	r := setupRouter()
+	router := SetupRouter()
+	bot := SetupTelegram()
+
 	PORT := os.Getenv("PORT")
 	if PORT == "" {
 		PORT = "4000"
 	}
+
+	log.Printf("Bot authorized on account %s", bot.Self.UserName)
+
+	SetupCommandHandler(bot)
+
 	print(fmt.Sprintf("Serving at http://localhost:%s", PORT))
-	r.Run(fmt.Sprintf(":%s", PORT))
+	router.Run(fmt.Sprintf(":%s", PORT))
+
 }

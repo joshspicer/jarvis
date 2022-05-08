@@ -16,7 +16,8 @@
 	},
 
 	"extensions": [
-		"golang.Go"
+		"golang.Go",
+		"IronGeek.vscode-env"
 	],
 	"forwardPorts": [],
 	"remoteUser": "vscode",
