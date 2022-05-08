@@ -17,7 +17,7 @@ func main() {
 
 	log.Printf("Bot authorized on account %s", bot.Self.UserName)
 
-	SetupCommandHandler(bot)
+	go SetupCommandHandler(bot)
 
 	print(fmt.Sprintf("Serving at http://localhost:%s", PORT))
 	router.Run(fmt.Sprintf(":%s", PORT))

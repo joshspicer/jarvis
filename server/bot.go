@@ -62,7 +62,7 @@ func SetupCommandHandler(bot *tgbotapi.BotAPI) {
 			"VALID_TELEGRAM_SENDERS",
 			strconv.FormatInt(update.Message.From.ID, 10))
 		if !isValidSender {
-			println(fmt.Sprintf("Unauthorized user: %s", update.Message.From.UserName))
+			println(fmt.Sprintf("[!] Unauthorized user: %s (%d)", update.Message.From.UserName, update.Message.From.ID))
 			continue
 		}
 
@@ -70,7 +70,9 @@ func SetupCommandHandler(bot *tgbotapi.BotAPI) {
 			"VALID_TELEGRAM_GROUPS",
 			strconv.FormatInt(update.Message.Chat.ID, 10))
 		if !isValidGroup {
-			println(fmt.Sprintf("Unauthorized chat: %s", update.Message.Chat.Title))
+			title := update.Message.Chat.Title
+			sender := update.Message.From.UserName
+			println(fmt.Sprintf("[!] Unauthorized chat (type=%s): %s (%s)", update.Message.Chat.Type, sender, title))
 			continue
 		}
 
