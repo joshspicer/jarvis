@@ -5,7 +5,7 @@ jarvis v2
 
 ```bash
 
-$ docker build -t jarvis ./server/ -f build/Dockerfile
+$ docker build -t jarvis ./server/ -f ./Dockerfile
 
 $ docker run -p 4000:4000 --env-file example.env jarvis
 
