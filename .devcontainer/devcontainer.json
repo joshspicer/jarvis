@@ -17,13 +17,16 @@
 
 	"extensions": [
 		"golang.Go",
-		"IronGeek.vscode-env"
+		"IronGeek.vscode-env",
+		"ms-kubernetes-tools.vscode-aks-tools",
+		"ms-kubernetes-tools.vscode-kubernetes-tools"
 	],
 	"forwardPorts": [],
 	"remoteUser": "vscode",
 	"features": {
 		"docker-in-docker": "latest",
 		"github-cli": "latest",
-		"azure-cli": "latest"
+		"azure-cli": "latest",
+		"kubectl-helm-minikube": "latest"
 	}
 }
