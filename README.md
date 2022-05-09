@@ -25,3 +25,7 @@ $ docker run -p 4000:4000 --env-file example.env jarvis
 2022/05/08 21:08:37 Bot authorized on account 'dev_bot'
 Serving at http://localhost:4000
 ```
+
+## Related projects
+
+[jarvis-apple-watch](https://github.com/joshspicer/jarvis-apple-watch)
