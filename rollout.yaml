@@ -61,7 +61,7 @@ kind: Service
 metadata:
   name: jarvis
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   ports:
   - port: 80
   selector:
