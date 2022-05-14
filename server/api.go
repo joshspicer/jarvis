@@ -7,6 +7,8 @@ import (
 func SetupRouter() *gin.Engine {
 	router := gin.Default()
 
+	// Hello
+	router.GET("/", Hello)
 	// Health Endpoint
 	router.GET("/health", Health)
 	// Trusted Knock
