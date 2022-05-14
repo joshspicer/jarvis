@@ -100,3 +100,29 @@ spec:
       objectName: ValidTelegramGroups
     secretName: env-secrets
     type: Opaque
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: jarvis-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    cert-manager.io/cluster-issuer: letsencrypt
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - jarvis.spicer.dev
+    secretName: tls-secret
+  rules:
+  - host: jarvis.spicer.dev
+    http:
+      paths:
+      - path: /(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: jarvis
+            port:
+              number: 80
