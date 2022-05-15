@@ -10,6 +10,27 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
+type BotExtended struct {
+	*tgbotapi.BotAPI
+}
+
+func (b *BotExtended) SendMessageToPrimaryTelegramGroup(message string) {
+	// Get primary group, which is the first in the space-separated list.
+	validTelegramGroups := strings.Split(os.Getenv("VALID_TELEGRAM_GROUPS"), " ")
+
+	if len(validTelegramGroups) == 0 {
+		log.Panic("No valid Telegram groups configured.")
+	}
+
+	primaryChatId, err := strconv.ParseInt(validTelegramGroups[0], 10, 64)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	msg := tgbotapi.NewMessage(primaryChatId, message)
+	b.Send(msg)
+}
+
 func SetupTelegram() *tgbotapi.BotAPI {
 	TELEGRAM_BOT_TOKEN := os.Getenv("TELEGRAM_BOT_TOKEN")
 	if TELEGRAM_BOT_TOKEN == "" {

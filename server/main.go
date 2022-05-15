@@ -7,8 +7,8 @@ import (
 )
 
 func main() {
-	router := SetupRouter()
 	bot := SetupTelegram()
+	router := SetupRouter(bot)
 
 	PORT := os.Getenv("PORT")
 	if PORT == "" {

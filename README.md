@@ -4,13 +4,19 @@ A home automation/virtual assistant.
 
 ## Deploy
 
-Jarvis is hosted on Azure Kubernetes service via the [rollout spec](./rollout.yaml) in this repo.  The [deploy-to-cluster.yaml](./.github/workflows/deploy-to-cluster.yaml) workflow is triggers on pushes to `main`.
+Jarvis is hosted on Azure Kubernetes service via the [rollout spec](./rollout.yaml) in this repo. The [deploy-to-cluster.yaml](./.github/workflows/deploy-to-cluster.yaml) workflow is triggers on pushes to `main`.
 
-## Developing
+## Developing 🚀
 
 This repo is set up with a `.devcontainer.json` configuration, for development in Codespaces or Remote-Containers.
 
-Running the 'Start Server' vscode task will build and run the `go` project under `./server`.  The task expect a `dev.env` environment variable file.  See [example.env](./example.env) for an idea of what secrets are necessary.
+Running the `Start Server` vscode task will build and run the `go` project under `./server`.
+
+The task either:
+
+- A `dev.env` environment variable file. See [example.env](./example.env) for an idea of what secrets are necessary.
+
+- [Codespace repo-scoped secrets](https://docs.github.com/en/enterprise-cloud@latest/rest/codespaces/repository-secrets) for [each required secret](./example.env).
 
 ### Build Docker Image
 

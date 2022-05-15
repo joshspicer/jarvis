@@ -102,3 +102,13 @@ func TrustedHmacAuthentication() gin.HandlerFunc {
 func TrustedKnock(c *gin.Context) {
 	c.String(http.StatusAccepted, "trusted knock")
 }
+
+func Welcome(c *gin.Context) {
+
+	bot := c.MustGet(BOT_CONTEXT).(*BotExtended)
+	invite_code := c.Param("invite_code")
+
+	bot.SendMessageToPrimaryTelegramGroup(fmt.Sprintf("Welcome %s", invite_code))
+
+	c.String(http.StatusAccepted, "welcome, "+invite_code)
+}

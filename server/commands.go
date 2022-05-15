@@ -1,9 +1,13 @@
 package main
 
+import (
+	"time"
+)
+
 func HelpCommand() string {
-	return "help?!"
+	return ("- /status\n")
 }
 
 func StatusCommand() string {
-	return "status!"
+	return time.Now().Weekday().String()
 }
