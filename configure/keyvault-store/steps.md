@@ -1,0 +1,2 @@
+- https://docs.microsoft.com/en-us/azure/aks/csi-secrets-store-driver
+- https://docs.microsoft.com/en-us/azure/aks/csi-secrets-store-identity-access
