@@ -138,9 +138,38 @@ spec:
   tls:
   - hosts:
     - jarvis.spicer.dev
-    secretName: tls-secret
+    secretName: tls-secret-spicerdev
   rules:
   - host: jarvis.spicer.dev
+    http:
+      paths:
+      - path: /(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: jarvis
+            port:
+              number: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: willow-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/limit-rpm: "5"
+    nginx.ingress.kubernetes.io/limit-rps: "2"
+    nginx.ingress.kubernetes.io/limit-burst-multiplier: "1"
+    cert-manager.io/cluster-issuer: letsencrypt
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - willow.party
+    secretName: tls-secret-willowparty
+  rules:
+  - host: willow.party
     http:
       paths:
       - path: /(.*)
