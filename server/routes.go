@@ -94,6 +94,9 @@ func TrustedHmacAuthentication() gin.HandlerFunc {
 			}
 		}
 
+		bot := c.MustGet(BOT_CONTEXT).(*BotExtended)
+		bot.SendMessageToPrimaryTelegramGroup("[!] An attempt to validate an HMAC hash failed.")
+
 		// Fallback
 		c.AbortWithStatus(401)
 	}
