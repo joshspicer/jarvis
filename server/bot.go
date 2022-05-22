@@ -116,6 +116,8 @@ func SetupCommandHandler(bot *tgbotapi.BotAPI) {
 			msg.Text = HelpCommand()
 		case "status":
 			msg.Text = StatusCommand()
+		case "invite":
+			msg.Text = InviteCommand(update.Message.CommandArguments())
 		default:
 			msg.Text = "Try Again."
 		}
