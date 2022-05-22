@@ -5,6 +5,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 func HelpCommand() string {
@@ -30,7 +32,11 @@ func InviteCommand(args string) string {
 		count = providedCount
 	}
 
+	uuid, err := uuid.NewRandom()
+	if err != nil {
+		return "Failed to generate unique invite Id"
+	}
 	expiration := time.Now().Add(time.Hour * 32)
 
-	return fmt.Sprintf("%s has been invited %d times until %d", name, count, expiration)
+	return fmt.Sprintf("%s has been invited %d times until %s.  Invite code: %s", name, count, expiration.Format(time.RFC822Z), uuid.String())
 }
