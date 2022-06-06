@@ -38,7 +38,7 @@ func InviteCommand(args string) string {
 	}
 	expiration := time.Now().Add(time.Hour * 32)
 
-	// TOOD: Acually do it.
+	// TODO: Acually do it.
 
 	return fmt.Sprintf("%s has been invited %d times until %s.  Invite code: %s", name, count, expiration.Format(time.RFC822Z), uuid.String())
 }

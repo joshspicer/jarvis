@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io/ioutil"
+	"math"
 	"net/http"
 	"strconv"
 	"strings"
@@ -66,8 +67,8 @@ func TrustedHmacAuthentication() gin.HandlerFunc {
 		currentTime := time.Now()
 		timeDiff := currentTime.Sub(timestamp).Seconds()
 		fmt.Printf("Time difference %f seconds\n", timeDiff)
-		if timeDiff > 60 {
-			fmt.Printf("Time difference %f seconds\n", timeDiff)
+		if math.Abs(timeDiff) > 60 {
+			fmt.Printf("Absolute time difference (%f seconds), greater than threshold!\n", timeDiff)
 			c.AbortWithStatus(401)
 		}
 
@@ -105,18 +106,21 @@ func TrustedHmacAuthentication() gin.HandlerFunc {
 				matchStr := fmt.Sprintf("✅ Hash match: %s\n", actor.name)
 				fmt.Println(matchStr)
 				bot.SendMessageToPrimaryTelegramGroup(matchStr)
+				c.Set("authenticatedUser", actor.name)
 				c.String(http.StatusAccepted, actor.name)
 				return
 			}
 		}
 
 		// Fallback
-		bot.SendMessageToPrimaryTelegramGroup("⚠️ An attempt to validate an HMAC hash failed.")
+		bot.SendMessageToPrimaryTelegramGroup("⚠️ Invalid authentication hash provided.")
 		c.AbortWithStatus(401)
 	}
 }
 
 func TrustedKnock(c *gin.Context) {
+	// Protected by 'TrustedHmacAuthentication' middleware
+	authenticatedUser := c.MustGet("authenticatedUser").(string)
 
 	august := c.MustGet(AUGUST_HTTP_CONTEXT).(*AugustHttpClient)
 
@@ -128,7 +132,7 @@ func TrustedKnock(c *gin.Context) {
 
 	// Accept if we have not aborted.
 	if !c.IsAborted() {
-		c.String(http.StatusAccepted, "trusted knock")
+		c.String(http.StatusAccepted, fmt.Sprintf("Welcome, %s.", authenticatedUser))
 	}
 }
 
@@ -137,7 +141,7 @@ func Welcome(c *gin.Context) {
 	bot := c.MustGet(BOT_CONTEXT).(*BotExtended)
 	invite_code := c.Param("invite_code")
 
+	// TODO
 	bot.SendMessageToPrimaryTelegramGroup(fmt.Sprintf("Welcome %s", invite_code))
-
-	c.String(http.StatusAccepted, "welcome, "+invite_code)
+	c.String(http.StatusAccepted, "Welcome, "+invite_code)
 }

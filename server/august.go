@@ -107,7 +107,7 @@ func (client AugustHttpClient) OperateLock(mode string) error {
 	res, err := client.Do(httpRequest)
 
 	if err != nil || res.StatusCode > 299 {
-		return fmt.Errorf("error unlocking lock  (%d): %v", res.StatusCode, err)
+		return fmt.Errorf("error unlocking lock (%d): %v", res.StatusCode, err)
 	}
 
 	return nil
