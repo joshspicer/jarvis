@@ -56,6 +56,10 @@ func TrustedHmacAuthentication() gin.HandlerFunc {
 			timestamp = time.Unix(timestampAsInt, 0)
 		}
 
+		if c.IsAborted() {
+			return
+		}
+
 		// The nonce encodes 'timestamp'.
 		// Do not accept requests
 		// with a 'timestamp' a +/- 1 minute from system time.
@@ -67,16 +71,21 @@ func TrustedHmacAuthentication() gin.HandlerFunc {
 			c.AbortWithStatus(401)
 		}
 
-		// Retrieve list of trusted actors
-		var trustedActors []Actor = GetTrustedActors()
-		taLen := len(trustedActors)
-		if taLen == 0 {
-			println("No trusted actors available.")
-			c.AbortWithStatus(http.StatusInternalServerError)
+		if c.IsAborted() {
+			return
 		}
 
+		bot := c.MustGet(BOT_CONTEXT).(*BotExtended)
+
+		// Retrieve list of trusted actors
+
+		trustedActors, err := GetTrustedActors()
+		if err != nil {
+			fmt.Printf("Failed to retrieve trusted actors: %s\n", err)
+			c.AbortWithStatus(http.StatusInternalServerError)
+		}
 		// Regenerate hash for each trusted actor and compare.
-		for i := 0; i < taLen; i++ {
+		for i := 0; i < len(trustedActors); i++ {
 			actor := trustedActors[i]
 
 			h := hmac.New(
@@ -94,7 +103,6 @@ func TrustedHmacAuthentication() gin.HandlerFunc {
 			}
 		}
 
-		bot := c.MustGet(BOT_CONTEXT).(*BotExtended)
 		bot.SendMessageToPrimaryTelegramGroup("[!] An attempt to validate an HMAC hash failed.")
 
 		// Fallback
@@ -103,7 +111,19 @@ func TrustedHmacAuthentication() gin.HandlerFunc {
 }
 
 func TrustedKnock(c *gin.Context) {
-	c.String(http.StatusAccepted, "trusted knock")
+
+	august := c.MustGet(AUGUST_HTTP_CONTEXT).(*AugustHttpClient)
+
+	error := august.OperateLock("unlock")
+	if error != nil {
+		fmt.Println(fmt.Errorf("failed to unlock August: %s", error))
+		c.AbortWithStatus(http.StatusInternalServerError)
+	}
+
+	// Accept if we have not aborted.
+	if !c.IsAborted() {
+		c.String(http.StatusAccepted, "trusted knock")
+	}
 }
 
 func Welcome(c *gin.Context) {
