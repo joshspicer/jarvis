@@ -156,6 +156,20 @@ spec:
       objectName: ValidTelegramSenders
     - key: ValidTelegramGroups
       objectName: ValidTelegramGroups
+    - key: TrustedActors
+      objectName: TrustedActors
+    - key: AugustApiKey
+      objectName: AugustApiKey
+    - key: AugustInstallId
+      objectName: AugustInstallId
+    - key: AugustPassword
+      objectName: AugustPassword
+    - key: AugustIdType
+      objectName: AugustIdType
+    - key: AugustId
+      objectName: AugustId
+    - key: AugustLockId
+      objectName: AugustLockId
     secretName: env-secrets
     type: Opaque
 ---
