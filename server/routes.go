@@ -97,15 +97,16 @@ func TrustedHmacAuthentication() gin.HandlerFunc {
 			// fmt.Printf("\nsecret: %s \ncomputed: %s \nexpected: %s \n\n", actor.secret, computedHash, authHeader)
 
 			if computedHash == authHeader {
-				fmt.Printf("Hash match: %s\n", actor.name)
+				matchStr := fmt.Sprintf("✅ Hash match: %s\n", actor.name)
+				fmt.Println(matchStr)
+				bot.SendMessageToPrimaryTelegramGroup(matchStr)
 				c.String(http.StatusAccepted, actor.name)
 				return
 			}
 		}
 
-		bot.SendMessageToPrimaryTelegramGroup("[!] An attempt to validate an HMAC hash failed.")
-
 		// Fallback
+		bot.SendMessageToPrimaryTelegramGroup("⚠️ An attempt to validate an HMAC hash failed.")
 		c.AbortWithStatus(401)
 	}
 }
