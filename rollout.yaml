@@ -50,6 +50,41 @@ spec:
             secretKeyRef:
               name: env-secrets
               key: ValidTelegramGroups
+        - name: TRUSTED_ACTORS
+          valueFrom:
+            secretKeyRef:
+              name: env-secrets
+              key: TrustedActors
+        - name: AUGUST_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: env-secrets
+              key: AugustApiKey
+        - name: AUGUST_INSTALLID
+          valueFrom:
+            secretKeyRef:
+              name: env-secrets
+              key: AugustInstallId
+        - name: AUGUST_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: env-secrets
+              key: AugustPassword
+        - name: AUGUST_ID_TYPE
+          valueFrom:
+            secretKeyRef:
+              name: env-secrets
+              key: AugustIdType
+        - name: AUGUST_ID
+          valueFrom:
+            secretKeyRef:
+              name: env-secrets
+              key: AugustId
+        - name: AUGUST_LOCK_ID
+          valueFrom:
+            secretKeyRef:
+              name: env-secrets
+              key: AugustLockId
       volumes:
         - name: secrets-store01-inline
           csi:
@@ -90,6 +125,27 @@ spec:
           objectType: secret
         - |
           objectName: ValidTelegramGroups
+          objectType: secret
+        - |
+          objectName: TrustedActors
+          objectType: secret
+        - |
+          objectName: AugustApiKey
+          objectType: secret
+        - |
+          objectName: AugustInstallId
+          objectType: secret
+        - |
+          objectName: AugustPassword
+          objectType: secret
+        - |
+          objectName: AugustIdType
+          objectType: secret
+        - |
+          objectName: AugustId
+          objectType: secret
+        - |
+          objectName: AugustLockId
           objectType: secret
     tenantId: 0ad1a6ca-bf0b-4eea-b39d-a0a369403977   # The tenant ID of the key vault
   secretObjects:
