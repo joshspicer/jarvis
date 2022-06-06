@@ -84,9 +84,14 @@ func TrustedHmacAuthentication() gin.HandlerFunc {
 			fmt.Printf("Failed to retrieve trusted actors: %s\n", err)
 			c.AbortWithStatus(http.StatusInternalServerError)
 		}
+
+		actorLen := len(trustedActors)
+		fmt.Printf("Checking received hash against '%d' trusted actors\n", actorLen)
+
 		// Regenerate hash for each trusted actor and compare.
-		for i := 0; i < len(trustedActors); i++ {
+		for i := 0; i < actorLen; i++ {
 			actor := trustedActors[i]
+			fmt.Printf("Checking hash against actor %s....\n", actor.name)
 
 			h := hmac.New(
 				sha256.New,
