@@ -37,8 +37,11 @@ func SetupRouter(bot *tgbotapi.BotAPI) *gin.Engine {
 	router.Use(BotContext(bot))
 	router.Use(AugustHttpClientContext())
 
+	// Static
+	router.StaticFile("robots.txt", "./static/robots.txt")
+
 	// Hello
-	router.GET("/", Hello)
+	// router.GET("/", Hello)
 	// Health Endpoint
 	router.GET("/health", Health)
 	// Knocks
