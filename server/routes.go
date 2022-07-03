@@ -5,7 +5,6 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
-	"io/ioutil"
 	"math"
 	"net/http"
 	"strconv"
@@ -26,36 +25,26 @@ func Health(c *gin.Context) {
 func TrustedHmacAuthentication() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.Request.Header.Get("Authorization")
-		if authHeader == "" {
+		nonce := c.Request.Header.Get("X-Jarvis-Timestamp")
+
+		if authHeader == "" || nonce == "" {
 			c.AbortWithStatus(401)
 		}
 
-		var nonce string
 		var timestamp time.Time
 
-		// Parse request Body
-		if c.Request.Body != nil {
-
-			bodyBytes, _ := ioutil.ReadAll(c.Request.Body)
-			if len(bodyBytes) == 0 {
-				c.AbortWithStatus(401)
-			}
-
-			nonce = string(bodyBytes)
-
-			splitted := strings.Split(nonce, "_")
-			if len(splitted) != 2 {
-				c.AbortWithStatus(401)
-			}
-
-			timestampAsInt, err := strconv.ParseInt(splitted[0], 10, 64)
-			if err != nil {
-				fmt.Printf("Failed to parse timestamp from body: %s\n", splitted[0])
-				c.AbortWithStatus(401)
-			}
-
-			timestamp = time.Unix(timestampAsInt, 0)
+		splitted := strings.Split(nonce, "_")
+		if len(splitted) != 2 {
+			c.AbortWithStatus(401)
 		}
+
+		timestampAsInt, err := strconv.ParseInt(splitted[0], 10, 64)
+		if err != nil {
+			fmt.Printf("Failed to parse timestamp from body: %s\n", strings.ReplaceAll(splitted[0], "\n", ""))
+			c.AbortWithStatus(401)
+		}
+
+		timestamp = time.Unix(timestampAsInt, 0)
 
 		if c.IsAborted() {
 			return
@@ -108,6 +97,10 @@ func TrustedHmacAuthentication() gin.HandlerFunc {
 				bot.SendMessageToPrimaryTelegramGroup(matchStr)
 				c.Set("authenticatedUser", actor.name)
 				c.String(http.StatusAccepted, actor.name)
+
+				device := c.Request.Header.Get("X-Jarvis-Device")
+				fmt.Printf("Device: %s\n", strings.ReplaceAll(device, "\n", ""))
+
 				return
 			}
 		}
