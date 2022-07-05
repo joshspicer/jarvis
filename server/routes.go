@@ -18,7 +18,6 @@ const AUGUST_HTTP_CONTEXT = `AUGUST_HTTP_CONTEXT`
 
 func BotContext(bot *tgbotapi.BotAPI) gin.HandlerFunc {
 	return func(c *gin.Context) {
-
 		botExtended := &BotExtended{bot}
 
 		c.Set(BOT_CONTEXT, botExtended)

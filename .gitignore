@@ -17,4 +17,5 @@
 # Development artifacts
 dev.env
 jarvis
+jarvisAgent
 __debug_bin
