@@ -20,10 +20,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Hello(c *gin.Context) {
-	c.String(http.StatusOK, "hello")
-}
-
 func Health(c *gin.Context) {
 	c.String(http.StatusOK, "healthy")
 }
