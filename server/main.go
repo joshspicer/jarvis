@@ -13,8 +13,11 @@ import (
 func main() {
 	// Startup variables set to panic if any errors occur.
 	bot := SetupTelegram()
-	azureCredential := InitAzure(true) // Ensures a default credential can be created and checks for existance of required DBs
-	router := SetupRouter(bot, azureCredential)
+
+	az := AzureExtended{}
+	az.RefreshCredential(true)
+
+	router := SetupRouter(bot, &az)
 
 	PORT := os.Getenv("PORT")
 	if PORT == "" {

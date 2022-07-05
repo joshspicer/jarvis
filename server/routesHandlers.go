@@ -5,6 +5,7 @@
 package main
 
 import (
+	"context"
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
@@ -17,6 +18,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/data/azcosmos"
 	"github.com/gin-gonic/gin"
 )
 
@@ -96,9 +98,8 @@ func TrustedHmacAuthentication() gin.HandlerFunc {
 			if computedHash == authHeader {
 				matchStr := fmt.Sprintf("✅ Hash match: %s\n", actor.name)
 				fmt.Println(matchStr)
-				bot.SendMessageToPrimaryTelegramGroup(matchStr)
+				// bot.SendMessageToPrimaryTelegramGroup(matchStr)
 				c.Set("authenticatedUser", actor.name)
-				c.String(http.StatusAccepted, actor.name)
 
 				device := c.Request.Header.Get("X-Jarvis-Device")
 				fmt.Printf("Device: %s\n", strings.ReplaceAll(device, "\n", ""))
@@ -115,7 +116,11 @@ func TrustedHmacAuthentication() gin.HandlerFunc {
 func TrustedKnock(c *gin.Context) {
 	// Protected by 'TrustedHmacAuthentication' middleware
 	authenticatedUser := c.MustGet("authenticatedUser").(string)
-	fmt.Printf("TrustedKnock for %s\n", authenticatedUser)
+
+	bot := c.MustGet(BOT_CONTEXT).(*BotExtended)
+
+	matchStr := fmt.Sprintf("✅ %s has knocked.\n", authenticatedUser)
+	bot.SendMessageToPrimaryTelegramGroup(matchStr)
 
 	august := c.MustGet(AUGUST_HTTP_CONTEXT).(*AugustHttpClient)
 
@@ -143,13 +148,15 @@ func Welcome(c *gin.Context) {
 
 func Telemetry(c *gin.Context) {
 	// Protected by 'TrustedHmacAuthentication' middleware
-	// authenticatedUser := c.MustGet("authenticatedUser").(string)
-	// fmt.Printf("Parsing posted telemetry for %s\n", authenticatedUser)
+	authenticatedUser := c.MustGet("authenticatedUser").(string)
+	fmt.Printf("Parsing posted telemetry for %s\n", authenticatedUser)
 
 	// Parse request Body
 	var telemetry TelemetryPayload
+	var bodyBytes []byte
+	var err error
 	if c.Request.Body != nil {
-		bodyBytes, err := ioutil.ReadAll(c.Request.Body)
+		bodyBytes, err = ioutil.ReadAll(c.Request.Body)
 		if len(bodyBytes) == 0 {
 			c.AbortWithError(http.StatusBadRequest, err)
 			return
@@ -166,7 +173,20 @@ func Telemetry(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("status received: ", telemetry.State)
+	fmt.Printf("Status received: %d", telemetry.State)
+
+	// Write telemetry to db
+	// TODO: How to get this to work without panicing?
+	// az := c.MustGet(AZURE_CONTEXT).(*AzureExtended)
+
+	// NOTE: We partition on the "type" attribute
+	containerClient := ConnectToCosmosContainer(false)
+	_, err = containerClient.UpsertItem(context.TODO(), azcosmos.NewPartitionKeyString("telemetry"), bodyBytes, nil)
+	if err != nil {
+		fmt.Printf("Failed : %s\n", err)
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
 
 	c.Status(http.StatusOK)
 }

@@ -7,7 +7,6 @@ package main
 import (
 	"net/http"
 
-	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/gin-gonic/gin"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -25,12 +24,10 @@ func BotContext(bot *tgbotapi.BotAPI) gin.HandlerFunc {
 	}
 }
 
-func AzureIdentityContext(azureCredential *azidentity.DefaultAzureCredential) gin.HandlerFunc {
+func AzureIdentityContext(azureCredential *AzureExtended) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
-		azureExtended := &AzureIdentityExtended{azureCredential}
-
-		c.Set(AZURE_CONTEXT, azureExtended)
+		c.Set(AZURE_CONTEXT, azureCredential)
 		c.Next()
 	}
 }
@@ -46,7 +43,7 @@ func AugustHttpClientContext() gin.HandlerFunc {
 	}
 }
 
-func SetupRouter(bot *tgbotapi.BotAPI, azureCredential *azidentity.DefaultAzureCredential) *gin.Engine {
+func SetupRouter(bot *tgbotapi.BotAPI, azureCredential *AzureExtended) *gin.Engine {
 	router := gin.Default()
 
 	router.Use(BotContext(bot))
@@ -64,8 +61,7 @@ func SetupRouter(bot *tgbotapi.BotAPI, azureCredential *azidentity.DefaultAzureC
 	router.POST("/trustedknock", TrustedHmacAuthentication(), TrustedKnock)
 
 	// Status
-	// router.POST("/telemetry", TrustedHmacAuthentication(), Telemetry)
-	router.POST("/telemetry", Telemetry)
+	router.POST("/telemetry", TrustedHmacAuthentication(), Telemetry)
 
 	return router
 }
