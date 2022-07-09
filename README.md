@@ -1,6 +1,6 @@
 # jarvis (v2)
 
-A home automation/virtual assistant.
+An assortment of microservices and home automation services/experiments. Wrapped into a friendly chatbot (named Jarvis) and hosted in an Azure Kubernetes cluster.
 
 ## Deploy
 
