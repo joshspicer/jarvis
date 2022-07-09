@@ -1,3 +1,7 @@
+/**
+ *  Authored: Josh Spicer <hello@joshspicer.com>
+ */
+
 package main
 
 import (
@@ -14,6 +18,7 @@ func HelpCommand() string {
 }
 
 func StatusCommand() string {
+	// TODO
 	return time.Now().Weekday().String()
 }
 

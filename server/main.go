@@ -1,3 +1,7 @@
+/**
+ *  Authored: Josh Spicer <hello@joshspicer.com>
+ */
+
 package main
 
 import (
@@ -7,8 +11,13 @@ import (
 )
 
 func main() {
+	// Startup variables set to panic if any errors occur.
 	bot := SetupTelegram()
-	router := SetupRouter(bot)
+
+	az := AzureExtended{}
+	az.RefreshCredential(true)
+
+	router := SetupRouter(bot, &az)
 
 	PORT := os.Getenv("PORT")
 	if PORT == "" {
