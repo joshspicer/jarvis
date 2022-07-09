@@ -12,7 +12,10 @@ RUN cd / \
 RUN cd /iodine \
     && make
 
+RUN cd /iodine \
+    && make install
+
 RUN chmod +x /iodine/start.sh
 
 ENTRYPOINT ["sh"]
-CMD [ "/iodine/start.sh"]
+CMD ["iodined"]
