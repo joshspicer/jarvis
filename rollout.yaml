@@ -309,8 +309,9 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: minecraft-ingress
+  labels: 
+    app: minecraft
 spec:
-  ingressClassName: nginx
   rules:
   - host: world.spicer.dev
     http:
@@ -318,5 +319,7 @@ spec:
         - path: /
           pathType: Exact
           backend:
-            serviceName: minecraft
-            servicePort: 25565
+            service:
+              name: minecraft
+              port:
+                number: 25565
