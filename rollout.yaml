@@ -250,6 +250,7 @@ spec:
             port:
               number: 80
 ---
+# MINECRAFT JAVA
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -280,6 +281,8 @@ spec:
           env:
             - name: EULA
               value: "TRUE"
+            - name: SERVER_NAME
+              value: "SpiceCraft"
           volumeMounts:
             - name: world
               mountPath: /data
@@ -328,3 +331,81 @@ metadata:
   namespace: default
 data:
   "25565": default/minecraft:25565
+---
+# vvvvvvBEDROCK vvvvvv
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ingress-nginx-udp
+  namespace: default
+data:
+  "19132": default/bedrock:19132
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bedrock-server
+spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bedrock
+  template:
+    metadata:
+      labels:
+        app: bedrock
+    spec:
+      volumes:
+        - name: world
+          persistentVolumeClaim:
+            claimName: bedrock-world
+      containers:
+        - name: bedrock
+          image: itzg/minecraft-bedrock-server
+          imagePullPolicy: Always
+          env:
+            - name: EULA
+              value: "TRUE"
+            - name: SERVER_NAME
+              value: "SpiceCraft"
+          volumeMounts:
+            - name: world
+              mountPath: /data
+          ports:
+            - name: game-port
+              containerPort: 19132
+              hostPort: 19132
+          resources:
+            requests:
+              cpu: 50m
+              memory: 100Mi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: bedrock-world
+  labels:
+    app: bedrock
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bedrock
+spec:
+  type: ClusterIP
+  ports:
+  - port: 19132
+    targetPort: 19132
+  selector:
+    app: bedrock
