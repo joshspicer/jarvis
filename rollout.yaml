@@ -313,7 +313,14 @@ metadata:
   labels: 
     app: minecraft
 spec:
+  ingressClassName: nginx
   rules:
   - host: world.spicer.dev
     tcp:
-      25565: minecraft
+    - path: /(.*)
+      pathType: Prefix
+      backend:
+        service:
+          name: minecraft
+          port:
+            number: 25565
