@@ -313,5 +313,17 @@ spec:
   type: ClusterIP
   ports:
   - port: 25565
+    targetPort: 25565
   selector:
     app: minecraft
+---
+# This ConfigMap is added as a '--tcp-services-configmap' to the 'nginx-ingress-ingress-nginx-controller'
+# https://stackoverflow.com/questions/66367867/how-to-expose-port-22-via-nginx-ingress-controller
+# eg: --tcp-services-configmap=$(POD_NAMESPACE)/ingress-nginx-tcp
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ingress-nginx-tcp
+  namespace: default  
+data:
+  "25565": default/minecraft:25565
