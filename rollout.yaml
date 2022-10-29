@@ -319,11 +319,12 @@ spec:
 ---
 # This ConfigMap is added as a '--tcp-services-configmap' to the 'nginx-ingress-ingress-nginx-controller'
 # https://stackoverflow.com/questions/66367867/how-to-expose-port-22-via-nginx-ingress-controller
-# eg: --tcp-services-configmap=$(POD_NAMESPACE)/ingress-nginx-tcp
+# Also see: https://kubernetes.github.io/ingress-nginx/user-guide/exposing-tcp-udp-services/
+# NOTE: Must update service (kubectl edit service  nginx-ingress-ingress-nginx-controller -n ingress-basic)
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: ingress-nginx-tcp
-  namespace: default  
+  namespace: default
 data:
   "25565": default/minecraft:25565
