@@ -283,6 +283,7 @@ spec:
           volumeMounts:
             - name: world
               mountPath: /data
+          type: ClusterIP
           ports:
             - name: game-port
               containerPort: 25565
@@ -314,12 +315,5 @@ metadata:
 spec:
   rules:
   - host: world.spicer.dev
-    http:
-      paths:
-        - path: /
-          pathType: Exact
-          backend:
-            service:
-              name: minecraft
-              port:
-                number: 25565
+    tcp:
+      25565: minecraft
