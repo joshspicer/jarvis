@@ -304,3 +304,19 @@ spec:
   resources:
     requests:
       storage: 5Gi
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: minecraft-ingress
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: world.spicer.dev
+    http:
+      paths:
+        - path: /
+          pathType: Exact
+          backend:
+            serviceName: minecraft
+            servicePort: 25565
