@@ -380,6 +380,7 @@ spec:
             - name: game-port
               containerPort: 19132
               hostPort: 19132
+              protocol: UDP
           resources:
             requests:
               cpu: 50m
@@ -407,5 +408,6 @@ spec:
   ports:
   - port: 19132
     targetPort: 19132
+    protocol: UDP
   selector:
     app: bedrock
