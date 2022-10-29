@@ -283,7 +283,6 @@ spec:
           volumeMounts:
             - name: world
               mountPath: /data
-          type: ClusterIP
           ports:
             - name: game-port
               containerPort: 25565
