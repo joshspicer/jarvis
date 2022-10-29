@@ -306,21 +306,13 @@ spec:
     requests:
       storage: 5Gi
 ---
-apiVersion: networking.k8s.io/v1
-kind: Ingress
+apiVersion: v1
+kind: Service
 metadata:
-  name: minecraft-ingress
-  labels: 
-    app: minecraft
+  name: minecraft
 spec:
-  ingressClassName: nginx
-  rules:
-  - host: world.spicer.dev
-    tcp:
-    - path: /(.*)
-      pathType: Prefix
-      backend:
-        service:
-          name: minecraft
-          port:
-            number: 25565
+  type: ClusterIP
+  ports:
+  - port: 25565
+  selector:
+    app: minecraft
