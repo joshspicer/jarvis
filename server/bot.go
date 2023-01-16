@@ -63,7 +63,7 @@ func validate(configEnvVariable string, valueToCheck string) bool {
 	return false
 }
 
-func SetupCommandHandler(bot *tgbotapi.BotAPI) {
+func SetupCommandHandler(bot *BotExtended, handlerMode string) {
 
 	ginMode := os.Getenv("GIN_MODE")
 	if ginMode == "release" {
@@ -110,20 +110,48 @@ func SetupCommandHandler(bot *tgbotapi.BotAPI) {
 		// Create a new MessageConfig.
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
 
-		// Extract the command from the Message.
-		switch update.Message.Command() {
-		case "help":
-			msg.Text = HelpCommand()
-		case "status":
-			msg.Text = StatusCommand()
-		case "invite":
-			msg.Text = InviteCommand(update.Message.CommandArguments())
+		command := update.Message.Command()
+		args := update.Message.CommandArguments()
+		switch handlerMode {
+		case "jarvis":
+			msg.Text = jarvisCommandHandler(bot, command, args)
+		case "sentry":
+			msg.Text = sentryCommandHandler(bot, command, args)
 		default:
-			msg.Text = "Try Again."
+			msg.Text = "[ERR] Invalid handler mode!"
+			log.Printf("Invalid handler mode %s", handlerMode)
+
 		}
 
+		// Send result as response to the user
 		if _, err := bot.Send(msg); err != nil {
-			log.Panic(err)
+			log.Print(err)
 		}
+	}
+}
+
+func jarvisCommandHandler(bot *BotExtended, command string, args string) string {
+	// Extract the command from the Message.
+	switch command {
+	case "help":
+		return ServerHelpCommand()
+	case "status":
+		return ServerStatusCommand()
+	case "invite":
+		return AugustInviteCommand(args)
+	default:
+		return "Try Again."
+	}
+}
+
+func sentryCommandHandler(bot *BotExtended, command string, args string) string {
+	// Extract the command from the Message.
+	switch command {
+	case "help":
+		return "Sentry Help"
+	case "status":
+		return "Sentry status"
+	default:
+		return "Try Again."
 	}
 }

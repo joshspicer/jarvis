@@ -9,15 +9,15 @@ import (
 	"github.com/google/uuid"
 )
 
-func HelpCommand() string {
+func ServerHelpCommand() string {
 	return ("- /status\n")
 }
 
-func StatusCommand() string {
+func ServerStatusCommand() string {
 	return time.Now().Weekday().String()
 }
 
-func InviteCommand(args string) string {
+func AugustInviteCommand(args string) string {
 	split := strings.Split(args, " ")
 	if len(split) > 2 {
 		return "Too many arguments. Usage: /invite <name> [count=1]"
