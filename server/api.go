@@ -31,7 +31,7 @@ func AugustHttpClientContext() gin.HandlerFunc {
 	}
 }
 
-func SetupRouter(bot *tgbotapi.BotAPI) *gin.Engine {
+func SetupServerRouter(bot *tgbotapi.BotAPI) *gin.Engine {
 	router := gin.Default()
 
 	router.Use(BotContext(bot))
