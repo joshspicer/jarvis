@@ -250,164 +250,117 @@ spec:
             port:
               number: 80
 ---
-# MINECRAFT JAVA
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: minecraft-server
-spec:
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 1
-  replicas: 1
-  selector:
-    matchLabels:
-      app: minecraft
-  template:
-    metadata:
-      labels:
-        app: minecraft
-    spec:
-      volumes:
-        - name: world
-          persistentVolumeClaim:
-            claimName: minecraft-world
-      containers:
-        - name: minecraft
-          image: itzg/minecraft-server
-          imagePullPolicy: Always
-          env:
-            - name: EULA
-              value: "TRUE"
-            - name: SERVER_NAME
-              value: "SpiceCraft"
-          volumeMounts:
-            - name: world
-              mountPath: /data
-          ports:
-            - name: game-port
-              containerPort: 25565
-              hostPort: 25565
-          resources:
-            requests:
-              cpu: 50m
-              memory: 100Mi
----
+# VVVVVVV BEDROCK VVVVVVV
 apiVersion: v1
-kind: PersistentVolumeClaim
+kind: ConfigMap
 metadata:
-  name: minecraft-world
+  name: minecraft-bedrock
   labels:
-    app: minecraft
+    role: service-config
+    app: bds
+data:
+  # Find more options at https://github.com/itzg/docker-minecraft-bedrock-server#server-properties
+  # Remove # from in front of line if changing from default values.
+  EULA: "TRUE" # Must accept EULA to use this minecraft server
+  #GAMEMODE: "survival" # Options: survival, creative, adventure
+  #DIFFICULTY: "easy" # Options: peaceful, easy, normal, hard
+  #DEFAULT_PLAYER_PERMISSION_LEVEL: "member" # Options: visitor, member, operator
+  LEVEL_NAME: "bedrock_world"
+  #LEVEL_SEED: "33480944"
+  SERVER_NAME: "SpiceCraft2"
+  #SERVER_PORT: "19132"
+  #LEVEL_TYPE: "DEFAULT" # Options: FLAT, LEGACY, DEFAULT
+  ALLOW_CHEATS: "true" # Options: true, false
+  MAX_PLAYERS: "10"
+  #PLAYER_IDLE_TIMEOUT: "30"
+  #TEXTUREPACK_REQUIRED: "false" # Options: true, false
+  #
+  ## Changing these will have a security impact
+  #ONLINE_MODE: "true" # Options: true, false (removes Xbox Live account requirements)
+  #WHITE_LIST: "false" # If enabled, need to provide a whitelist.json by your own means. 
+  #
+  ## Changing these will have a performance impact
+  #VIEW_DISTANCE: "10"
+  #TICK_DISTANCE: "4"
+  #MAX_THREADS: "8"
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: bds
 spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 5Gi
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: minecraft
-spec:
-  type: ClusterIP
-  ports:
-  - port: 25565
-    targetPort: 25565
-  selector:
-    app: minecraft
----
-# This ConfigMap is added as a '--tcp-services-configmap' to the 'nginx-ingress-ingress-nginx-controller'
-# https://stackoverflow.com/questions/66367867/how-to-expose-port-22-via-nginx-ingress-controller
-# Also see: https://kubernetes.github.io/ingress-nginx/user-guide/exposing-tcp-udp-services/
-# NOTE: Must update service (kubectl edit service  nginx-ingress-ingress-nginx-controller -n ingress-basic)
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: ingress-nginx-tcp
-  namespace: default
-data:
-  "25565": default/minecraft:25565
----
-# vvvvvvBEDROCK vvvvvv
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: ingress-nginx-udp
-  namespace: default
-data:
-  "19132": default/bedrock:19132
+      storage: 1Gi
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
-  name: bedrock-server
+  labels:
+    app: bds
+  name: bds
 spec:
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 1
+  # never more than 1 since BDS is not horizontally scalable
   replicas: 1
+  serviceName: bds
   selector:
     matchLabels:
-      app: bedrock
+      app: bds
   template:
     metadata:
       labels:
-        app: bedrock
+        app: bds
     spec:
-      volumes:
-        - name: world
-          persistentVolumeClaim:
-            claimName: bedrock-world
       containers:
-        - name: bedrock
+        - name: main
           image: itzg/minecraft-bedrock-server
           imagePullPolicy: Always
-          env:
-            - name: EULA
-              value: "TRUE"
-            - name: SERVER_NAME
-              value: "SpiceCraft"
+          envFrom:
+            - configMapRef:
+                name: minecraft-bedrock
           volumeMounts:
-            - name: world
-              mountPath: /data
+            - mountPath: /data
+              name: data
           ports:
-            - name: game-port
-              containerPort: 19132
-              hostPort: 19132
+            - containerPort: 19132
               protocol: UDP
-          resources:
-            requests:
-              cpu: 50m
-              memory: 100Mi
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: bedrock-world
-  labels:
-    app: bedrock
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 5Gi
+          readinessProbe: &probe
+            exec:
+              command:
+                - mc-monitor
+                - status-bedrock
+                - --host
+                # force health check against IPv4 port
+                - 127.0.0.1
+            initialDelaySeconds: 30
+          livenessProbe: *probe
+          tty: true
+          stdin: true
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: bedrock
+  name: bds
 spec:
-  type: ClusterIP
-  ports:
-  - port: 19132
-    targetPort: 19132
-    protocol: UDP
   selector:
-    app: bedrock
+    app: bds
+  ports:
+    - port: 19132
+      protocol: UDP
+  ipFamily: IPv4
+  # Use LoadBalancer if running on a provider that supports that
+ type: LoadBalancer
+  # or use NodePort on a non-managed system;
+  # however, you'll need to lookup port assigned to the service
+  # type: NodePort
