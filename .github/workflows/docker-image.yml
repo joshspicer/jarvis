@@ -1,0 +1,27 @@
+name: Push GHCR Image
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  push:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Build the Docker image
+      run: docker build -f ./Dockerfile ./server --tag jarvis:latest
+
+    - name: Log in to registry
+      run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u USERNAME --password-stdin
+
+    - name: Push image
+      run: |
+        REMOTE_NAME="ghcr.io/${{ github.repository_owner }}/jarvis:latest"
+        docker tag jarvis:latest $REMOTE_NAME
+        docker push $REMOTE_NAME
