@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DOWNLOAD_WORLD_URL="*****"
+DOWNLOAD_WORLD_URL="$1"
 
 helm install mcjava \
     --set minecraftServer.eula=true \
