@@ -23,3 +23,4 @@ jobs:
         goversion: "1.18"
         project_path: "./server"
         binary_name: "jarvis"
+        asset_name: "asset_name: jarvis-${{ matrix.goos }}-${{ matrix.goarch }}
