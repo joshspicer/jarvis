@@ -6,19 +6,8 @@ on:
   workflow_dispatch:
 
 jobs:
-
-  create-release:
-    runs-on: ubuntu-latest
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    steps:
-      - uses: rymndhng/release-on-push-action@master
-        with:
-          bump_version_scheme: minor
-          
   push-release-assets-matrix:
     name: Release Go Binary
-    needs: [create-release]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -28,16 +17,23 @@ jobs:
           - goarch: "386"
             goos: darwin
     steps:
-    - uses: actions/checkout@v3
-    - uses: wangyoucao577/go-release-action@v1
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        goos: ${{ matrix.goos }}
-        goarch: ${{ matrix.goarch }}
-        goversion: "1.18"
-        project_path: "./server"
-        binary_name: "jarvis"
-        asset_name: jarvis-${{ matrix.goos }}-${{ matrix.goarch }}
+      - uses: actions/checkout@v3 
+      - uses: rymndhng/release-on-push-action@master
+        id: generate-release
+        with:
+          bump_version_scheme: minor
+      - uses: wangyoucao577/go-release-action@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          goos: ${{ matrix.goos }}
+          goarch: ${{ matrix.goarch }}
+          goversion: "1.18"
+          project_path: "./server"
+          md5sum: FALSE
+          sha266sum: TRUE
+          release_tag: ${{ steps.generate-release.outputs.tag_name }}
+          binary_name: "jarvis"
+          asset_name: jarvis-${{ matrix.goos }}-${{ matrix.goarch }}
 
   push-docker-image:
     runs-on: ubuntu-latest
@@ -46,13 +42,10 @@ jobs:
       contents: read
     steps:
     - uses: actions/checkout@v3
-
     - name: Build the Docker image
       run: docker build -f ./Dockerfile ./server --tag jarvis:latest
-
     - name: Log in to registry
       run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u USERNAME --password-stdin
-
     - name: Push image
       run: |
         REMOTE_NAME="ghcr.io/${{ github.repository_owner }}/jarvis:latest"
