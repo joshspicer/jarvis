@@ -1,4 +1,4 @@
-name: Push GHCR Image
+name: Push Artifacts
 
 on:
   push:
@@ -15,8 +15,31 @@ jobs:
       - uses: rymndhng/release-on-push-action@master
         with:
           bump_version_scheme: minor
+          
+  push-release-assets-matrix:
+    name: Release Go Binary
+    needs: [create-release]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        goos: [linux, darwin]
+        goarch: ["386", amd64, arm64]
+        exclude:
+          - goarch: "386"
+            goos: darwin
+    steps:
+    - uses: actions/checkout@v3
+    - uses: wangyoucao577/go-release-action@v1
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        goos: ${{ matrix.goos }}
+        goarch: ${{ matrix.goarch }}
+        goversion: "1.18"
+        project_path: "./server"
+        binary_name: "jarvis"
+        asset_name: jarvis-${{ matrix.goos }}-${{ matrix.goarch }}
 
-  push-image:
+  push-docker-image:
     runs-on: ubuntu-latest
     permissions:
       packages: write
