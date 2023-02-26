@@ -3,14 +3,24 @@ name: Push GHCR Image
 on:
   push:
     branches: [ "main" ]
+  workflow_dispatch:
 
 jobs:
-  push:
+
+  create-release:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: rymndhng/release-on-push-action@master
+        with:
+          bump_version_scheme: minor
+
+  push-image:
     runs-on: ubuntu-latest
     permissions:
       packages: write
       contents: read
-
     steps:
     - uses: actions/checkout@v3
 
