@@ -6,8 +6,22 @@ on:
   workflow_dispatch:
 
 jobs:
+
+  create-release:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    outputs:
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - uses: rymndhng/release-on-push-action@master
+        id: release
+        with:
+          bump_version_scheme: minor
+          
   push-release-assets-matrix:
     name: Release Go Binary
+    needs: [create-release]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -17,23 +31,19 @@ jobs:
           - goarch: "386"
             goos: darwin
     steps:
-      - uses: actions/checkout@v3 
-      - uses: rymndhng/release-on-push-action@master
-        id: generate-release
-        with:
-          bump_version_scheme: minor
-      - uses: wangyoucao577/go-release-action@v1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          goos: ${{ matrix.goos }}
-          goarch: ${{ matrix.goarch }}
-          goversion: "1.18"
-          project_path: "./server"
-          md5sum: FALSE
-          sha266sum: TRUE
-          release_tag: ${{ steps.generate-release.outputs.tag_name }}
-          binary_name: "jarvis"
-          asset_name: jarvis-${{ matrix.goos }}-${{ matrix.goarch }}
+    - uses: actions/checkout@v3
+    - uses: wangyoucao577/go-release-action@v1
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        goos: ${{ matrix.goos }}
+        goarch: ${{ matrix.goarch }}
+        goversion: "1.18"
+        md5sum: FALSE
+        sha256sum: TRUE
+        project_path: "./server"
+        binary_name: "jarvis"
+        release_tag: ${{ needs.create-release.outputs.tag_name }}
+        asset_name: jarvis-${{ matrix.goos }}-${{ matrix.goarch }}
 
   push-docker-image:
     runs-on: ubuntu-latest
