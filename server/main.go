@@ -6,11 +6,17 @@ import (
 	"os"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/joho/godotenv"
 )
 
 func main() {
 	// Get first argument to determine mode
 	mode := determineMode()
+
+	err := godotenv.Load()
+	if err != nil {
+		log.Printf("No .env file loaded")
+	}
 
 	bot := SetupTelegram()
 	log.Printf("Bot authorized on account %s", bot.Self.UserName)
@@ -49,17 +55,13 @@ func initializeSentry(bot *tgbotapi.BotAPI, mode string) {
 }
 
 func determineMode() string {
-
 	DEFAULT_MODE := "jarvis"
-
 	if len(os.Args) >= 2 {
 		return os.Args[1]
 	}
-
 	mode := os.Getenv("JARVIS_MODE")
 	if mode != "" {
 		return mode
 	}
-
 	return DEFAULT_MODE
 }
