@@ -115,8 +115,8 @@ func SetupCommandHandler(bot *BotExtended, handlerMode string) {
 		switch handlerMode {
 		case "jarvis":
 			msg.Text = jarvisCommandHandler(bot, command, args)
-		case "sentry":
-			msg.Text = sentryCommandHandler(bot, command, args)
+		case "narnia":
+			msg.Text = narniaCommandHandler(bot, command, args)
 		default:
 			msg.Text = "[ERR] Invalid handler mode!"
 			log.Printf("Invalid handler mode %s", handlerMode)
@@ -144,13 +144,13 @@ func jarvisCommandHandler(bot *BotExtended, command string, args string) string 
 	}
 }
 
-func sentryCommandHandler(bot *BotExtended, command string, args string) string {
+func narniaCommandHandler(bot *BotExtended, command string, args string) string {
 	// Extract the command from the Message.
 	switch command {
 	case "help":
-		return "Sentry Help"
+		return "narnia Help"
 	case "status":
-		return "Sentry status"
+		return "narnia status"
 	default:
 		return "Try Again."
 	}

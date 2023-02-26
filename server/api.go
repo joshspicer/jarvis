@@ -40,9 +40,7 @@ func SetupServerRouter(bot *tgbotapi.BotAPI) *gin.Engine {
 	// Static
 	router.StaticFile("robots.txt", "./static/robots.txt")
 
-	// Hello
 	// router.GET("/", Hello)
-	// Health Endpoint
 	router.GET("/health", Health)
 	// Knocks
 	router.POST("/welcome/:invite_code", Welcome)

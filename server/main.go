@@ -25,9 +25,9 @@ func main() {
 	case "jarvis":
 		log.Printf("Starting Jarvis")
 		initializeJarvis(bot, mode)
-	case "sentry":
-		log.Printf("Starting Sentry")
-		initializeSentry(bot, mode)
+	case "narnia":
+		log.Printf("Starting narnia")
+		initializeNarnia(bot, mode)
 	default:
 		log.Fatalf("Invalid mode: %s", mode)
 	}
@@ -47,10 +47,10 @@ func initializeJarvis(bot *tgbotapi.BotAPI, mode string) {
 	router.Run(fmt.Sprintf(":%s", PORT))
 }
 
-func initializeSentry(bot *tgbotapi.BotAPI, mode string) {
+func initializeNarnia(bot *tgbotapi.BotAPI, mode string) {
 
 	botExtended := &BotExtended{bot}
-	botExtended.SendMessageToPrimaryTelegramGroup("[sentry initializing]")
+	botExtended.SendMessageToPrimaryTelegramGroup("[narnia initializing]")
 	SetupCommandHandler(botExtended, mode)
 }
 
