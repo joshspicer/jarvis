@@ -7,11 +7,24 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/gin-gonic/gin"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
+const BOT_CONTEXT = "BOT_CONTEXT"
+
 type BotExtended struct {
 	*tgbotapi.BotAPI
+}
+
+func BotContext(bot *tgbotapi.BotAPI) gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		botExtended := &BotExtended{bot}
+
+		c.Set(BOT_CONTEXT, botExtended)
+		c.Next()
+	}
 }
 
 func (b *BotExtended) SendMessageToPrimaryTelegramGroup(message string) {
@@ -41,6 +54,9 @@ func SetupTelegram() *tgbotapi.BotAPI {
 	if err != nil {
 		panic(fmt.Sprintf("Error Creating new Telegram bot object: %s", err))
 	}
+
+	log.Printf("Bot authorized on account %s", bot.Self.UserName)
+
 	return bot
 }
 
@@ -63,7 +79,7 @@ func validate(configEnvVariable string, valueToCheck string) bool {
 	return false
 }
 
-func SetupCommandHandler(bot *BotExtended, handlerMode string) {
+func SetupTelegramCommandHandler(bot *BotExtended, handlerMode string) {
 
 	ginMode := os.Getenv("GIN_MODE")
 	if ginMode == "release" {
@@ -114,9 +130,9 @@ func SetupCommandHandler(bot *BotExtended, handlerMode string) {
 		args := update.Message.CommandArguments()
 		switch handlerMode {
 		case "jarvis":
-			msg.Text = jarvisCommandHandler(bot, command, args)
+			msg.Text = JarvisCommandHandler(bot, command, args)
 		case "narnia":
-			msg.Text = narniaCommandHandler(bot, command, args)
+			msg.Text = NarniaCommandHandler(bot, command, args)
 		default:
 			msg.Text = "[ERR] Invalid handler mode!"
 			log.Printf("Invalid handler mode %s", handlerMode)
@@ -127,31 +143,5 @@ func SetupCommandHandler(bot *BotExtended, handlerMode string) {
 		if _, err := bot.Send(msg); err != nil {
 			log.Print(err)
 		}
-	}
-}
-
-func jarvisCommandHandler(bot *BotExtended, command string, args string) string {
-	// Extract the command from the Message.
-	switch command {
-	case "help":
-		return ServerHelpCommand()
-	case "status":
-		return ServerStatusCommand()
-	case "invite":
-		return AugustInviteCommand(args)
-	default:
-		return "Try Again."
-	}
-}
-
-func narniaCommandHandler(bot *BotExtended, command string, args string) string {
-	// Extract the command from the Message.
-	switch command {
-	case "help":
-		return "narnia Help"
-	case "status":
-		return "narnia status"
-	default:
-		return "Try Again."
 	}
 }

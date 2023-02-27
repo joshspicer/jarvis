@@ -18,25 +18,26 @@ func main() {
 		log.Printf("No .env file loaded")
 	}
 
-	bot := SetupTelegram()
-	log.Printf("Bot authorized on account %s", bot.Self.UserName)
-
 	switch mode {
 	case "jarvis":
 		log.Printf("Starting Jarvis")
+		bot := SetupTelegram()
 		initializeJarvis(bot, mode)
 	case "narnia":
 		log.Printf("Starting narnia")
+		bot := SetupTelegram()
 		initializeNarnia(bot, mode)
+	case "niro":
+		log.Printf("Starting niro")
+		initializeNiro(mode)
 	default:
 		log.Fatalf("Invalid mode: %s", mode)
 	}
 }
 
 func initializeJarvis(bot *tgbotapi.BotAPI, mode string) {
-
-	router := SetupServerRouter(bot)
-	go SetupCommandHandler(&BotExtended{bot}, mode)
+	router := JarvisRouter(bot)
+	go SetupTelegramCommandHandler(&BotExtended{bot}, mode)
 
 	PORT := os.Getenv("PORT")
 	if PORT == "" {
@@ -48,10 +49,21 @@ func initializeJarvis(bot *tgbotapi.BotAPI, mode string) {
 }
 
 func initializeNarnia(bot *tgbotapi.BotAPI, mode string) {
-
 	botExtended := &BotExtended{bot}
 	botExtended.SendMessageToPrimaryTelegramGroup("[narnia initializing]")
-	SetupCommandHandler(botExtended, mode)
+	SetupTelegramCommandHandler(botExtended, mode)
+}
+
+func initializeNiro(mode string) {
+	router := NiroRouter()
+
+	PORT := os.Getenv("PORT")
+	if PORT == "" {
+		PORT = "4000"
+	}
+
+	log.Printf("Serving at http://localhost:%s", PORT)
+	router.Run(fmt.Sprintf(":%s", PORT))
 }
 
 func determineMode() string {

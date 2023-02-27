@@ -9,15 +9,29 @@ import (
 	"github.com/google/uuid"
 )
 
-func ServerHelpCommand() string {
+func JarvisCommandHandler(bot *BotExtended, command string, args string) string {
+	// Extract the command from the Message.
+	switch command {
+	case "help":
+		return jarvisHelpCommand()
+	case "status":
+		return jarvisStatusCommand()
+	case "invite":
+		return augustInviteCommand(args)
+	default:
+		return "Try Again."
+	}
+}
+
+func jarvisHelpCommand() string {
 	return ("- /status\n")
 }
 
-func ServerStatusCommand() string {
+func jarvisStatusCommand() string {
 	return time.Now().Weekday().String()
 }
 
-func AugustInviteCommand(args string) string {
+func augustInviteCommand(args string) string {
 	split := strings.Split(args, " ")
 	if len(split) > 2 {
 		return "Too many arguments. Usage: /invite <name> [count=1]"

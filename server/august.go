@@ -8,12 +8,26 @@ import (
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
+const AUGUST_HTTP_CONTEXT = `AUGUST_HTTP_CONTEXT`
 const AUGUST_SESSION_URL = "https://api-production.august.com/session"
 
 type AugustHttpClient struct {
 	*http.Client
+}
+
+func AugustHttpClientContext() gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		httpClient := &http.Client{}
+		augustHttpClient := &AugustHttpClient{httpClient}
+
+		c.Set(AUGUST_HTTP_CONTEXT, augustHttpClient)
+		c.Next()
+	}
 }
 
 type AugustSessionPayload struct {

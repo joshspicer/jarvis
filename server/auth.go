@@ -12,23 +12,40 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
-func Hello(c *gin.Context) {
-	c.String(http.StatusOK, "hello")
+func GenerateAuthHeaderForPrimaryActor() (string, string, error) {
+
+	trustedActors, err := GetTrustedActors()
+	if err != nil {
+		fmt.Printf("Failed to retrieve trusted actors: %s\n", err)
+		return "", "", err
+	}
+	var primaryActor = trustedActors[0]
+
+	timestamp := time.Now().Unix()
+	uuid, _ := uuid.NewRandom()
+	nonce := fmt.Sprintf("%d_%s", timestamp, uuid)
+
+	h := hmac.New(
+		sha256.New,
+		[]byte(primaryActor.secret))
+	h.Write([]byte(nonce))
+
+	auth := hex.EncodeToString(h.Sum(nil))
+
+	return auth, nonce, nil
 }
 
-func Health(c *gin.Context) {
-	c.String(http.StatusOK, "healthy")
-}
-
-func TrustedHmacAuthentication() gin.HandlerFunc {
+func Auth() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.Request.Header.Get("Authorization")
 		nonce := c.Request.Header.Get("X-Jarvis-Timestamp")
 
 		if authHeader == "" || nonce == "" {
 			c.AbortWithStatus(401)
+			return
 		}
 
 		var timestamp time.Time
@@ -36,12 +53,14 @@ func TrustedHmacAuthentication() gin.HandlerFunc {
 		splitted := strings.Split(nonce, "_")
 		if len(splitted) != 2 {
 			c.AbortWithStatus(401)
+			return
 		}
 
 		timestampAsInt, err := strconv.ParseInt(splitted[0], 10, 64)
 		if err != nil {
 			fmt.Printf("Failed to parse timestamp from body: %s\n", strings.ReplaceAll(splitted[0], "\n", ""))
 			c.AbortWithStatus(401)
+			return
 		}
 
 		timestamp = time.Unix(timestampAsInt, 0)
@@ -65,7 +84,11 @@ func TrustedHmacAuthentication() gin.HandlerFunc {
 			return
 		}
 
-		bot := c.MustGet(BOT_CONTEXT).(*BotExtended)
+		fetchedBot, hasBot := c.Get(BOT_CONTEXT)
+		var bot *BotExtended = nil
+		if hasBot {
+			bot = fetchedBot.(*BotExtended)
+		}
 
 		// Retrieve list of trusted actors
 
@@ -94,9 +117,11 @@ func TrustedHmacAuthentication() gin.HandlerFunc {
 			if computedHash == authHeader {
 				matchStr := fmt.Sprintf("✅ Hash match: %s\n", actor.name)
 				fmt.Println(matchStr)
-				bot.SendMessageToPrimaryTelegramGroup(matchStr)
+				if hasBot {
+					bot.SendMessageToPrimaryTelegramGroup(matchStr)
+				}
 				c.Set("authenticatedUser", actor.name)
-				c.String(http.StatusAccepted, actor.name)
+				c.Next()
 
 				device := c.Request.Header.Get("X-Jarvis-Device")
 				fmt.Printf("Device: %s\n", strings.ReplaceAll(device, "\n", ""))
@@ -106,35 +131,9 @@ func TrustedHmacAuthentication() gin.HandlerFunc {
 		}
 
 		// Fallback
-		bot.SendMessageToPrimaryTelegramGroup("⚠️ Invalid authentication hash provided.")
+		if hasBot {
+			bot.SendMessageToPrimaryTelegramGroup("⚠️ Invalid authentication hash provided.")
+		}
 		c.AbortWithStatus(401)
 	}
-}
-
-func TrustedKnock(c *gin.Context) {
-	// Protected by 'TrustedHmacAuthentication' middleware
-	authenticatedUser := c.MustGet("authenticatedUser").(string)
-
-	august := c.MustGet(AUGUST_HTTP_CONTEXT).(*AugustHttpClient)
-
-	error := august.OperateLock("unlock")
-	if error != nil {
-		fmt.Println(fmt.Errorf("failed to unlock August: %s", error))
-		c.AbortWithStatus(http.StatusInternalServerError)
-	}
-
-	// Accept if we have not aborted.
-	if !c.IsAborted() {
-		c.String(http.StatusAccepted, fmt.Sprintf("Welcome, %s.", authenticatedUser))
-	}
-}
-
-func Welcome(c *gin.Context) {
-
-	bot := c.MustGet(BOT_CONTEXT).(*BotExtended)
-	invite_code := c.Param("invite_code")
-
-	// TODO
-	bot.SendMessageToPrimaryTelegramGroup(fmt.Sprintf("Welcome %s", invite_code))
-	c.String(http.StatusAccepted, "Welcome, "+invite_code)
 }
