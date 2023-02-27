@@ -23,6 +23,8 @@ jobs:
     name: Release Go Binary
     needs: [create-release]
     runs-on: ubuntu-latest
+    env:
+      GOARM: "7"
     strategy:
       matrix:
         goos: [linux, darwin]
