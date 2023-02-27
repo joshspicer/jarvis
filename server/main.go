@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
+	"github.com/gin-gonic/autotls"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/joho/godotenv"
 )
@@ -57,13 +59,20 @@ func initializeNarnia(bot *tgbotapi.BotAPI, mode string) {
 func initializeNiro(mode string) {
 	router := NiroRouter()
 
-	PORT := os.Getenv("PORT")
-	if PORT == "" {
-		PORT = "4000"
-	}
+	HTTPS_DOMAINS := os.Getenv("HTTPS_DOMAINS")
 
-	log.Printf("Serving at http://localhost:%s", PORT)
-	router.Run(fmt.Sprintf(":%s", PORT))
+	if HTTPS_DOMAINS != "" {
+		split := strings.Split(HTTPS_DOMAINS, ",")
+		log.Printf("Serving as HTTPS on one of: '%s'", HTTPS_DOMAINS)
+		log.Fatal(autotls.Run(router, split...))
+	} else {
+		PORT := os.Getenv("PORT")
+		if PORT == "" {
+			PORT = "4000"
+		}
+		log.Printf("Serving at http://localhost:%s", PORT)
+		router.Run(fmt.Sprintf(":%s", PORT))
+	}
 }
 
 func determineMode() string {
