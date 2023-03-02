@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/autotls"
+	"github.com/gin-gonic/gin"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/joho/godotenv"
 )
@@ -17,9 +18,14 @@ func main() {
 
 	err := godotenv.Load()
 	if err != nil {
-		log.Printf("No .env file loaded")
+		log.Printf("NOTE: No .env file loaded\n")
 	}
 
+	_, isRelease := os.LookupEnv("RELEASE")
+	if isRelease {
+		log.Printf("Mode: Release\n")
+		gin.SetMode(gin.ReleaseMode)
+	}
 	switch mode {
 	case "jarvis":
 		log.Printf("Starting Jarvis")
