@@ -9,13 +9,13 @@ import (
 	"github.com/google/uuid"
 )
 
-func JarvisCommandHandler(bot *BotExtended, command string, args string) string {
+func ClusterCommandHandler(bot *BotExtended, command string, args string) string {
 	// Extract the command from the Message.
 	switch command {
 	case "help":
-		return jarvisHelpCommand()
+		return clustersHelpCommand()
 	case "status":
-		return jarvisStatusCommand()
+		return clusterStatusCommand()
 	case "invite":
 		return augustInviteCommand(args)
 	default:
@@ -23,11 +23,11 @@ func JarvisCommandHandler(bot *BotExtended, command string, args string) string 
 	}
 }
 
-func jarvisHelpCommand() string {
+func clustersHelpCommand() string {
 	return ("- /status\n")
 }
 
-func jarvisStatusCommand() string {
+func clusterStatusCommand() string {
 	return time.Now().Weekday().String()
 }
 

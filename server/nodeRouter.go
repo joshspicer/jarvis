@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func NiroRouter() *gin.Engine {
+func NodeRouter() *gin.Engine {
 	router := gin.Default()
 
 	// Static
@@ -14,12 +14,12 @@ func NiroRouter() *gin.Engine {
 
 	// router.GET("/", Hello)
 	router.GET("/health", health)
-	router.GET("/info", Auth(), getNiroInfo)
+	router.GET("/info", Auth(), getNodeInfo)
 
 	return router
 }
 
-func getNiroInfo(c *gin.Context) {
+func getNodeInfo(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Hello World",
 	})

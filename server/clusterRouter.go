@@ -8,7 +8,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-func JarvisRouter(bot *tgbotapi.BotAPI) *gin.Engine {
+func ClusterRouter(bot *tgbotapi.BotAPI) *gin.Engine {
 	router := gin.Default()
 
 	router.Use(BotContext(bot))

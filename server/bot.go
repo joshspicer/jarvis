@@ -129,10 +129,10 @@ func SetupTelegramCommandHandler(bot *BotExtended, handlerMode string) {
 		command := update.Message.Command()
 		args := update.Message.CommandArguments()
 		switch handlerMode {
-		case "jarvis":
-			msg.Text = JarvisCommandHandler(bot, command, args)
-		case "narnia":
-			msg.Text = NarniaCommandHandler(bot, command, args)
+		case "cluster":
+			msg.Text = ClusterCommandHandler(bot, command, args)
+		case "router":
+			msg.Text = RouterCommandHandler(bot, command, args)
 		default:
 			msg.Text = "[ERR] Invalid handler mode!"
 			log.Printf("Invalid handler mode %s", handlerMode)

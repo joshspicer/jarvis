@@ -27,24 +27,24 @@ func main() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 	switch mode {
-	case "jarvis":
-		log.Printf("Starting Jarvis")
+	case "cluster":
+		log.Printf("Starting cluster")
 		bot := SetupTelegram()
-		initializeJarvis(bot, mode)
-	case "narnia":
-		log.Printf("Starting narnia")
+		initializeCluster(bot, mode)
+	case "router":
+		log.Printf("Starting router")
 		bot := SetupTelegram()
-		initializeNarnia(bot, mode)
-	case "niro":
-		log.Printf("Starting niro")
-		initializeNiro(mode)
+		initializeRouter(bot, mode)
+	case "node":
+		log.Printf("Starting node")
+		initializeNode(mode)
 	default:
 		log.Fatalf("Invalid mode: %s", mode)
 	}
 }
 
-func initializeJarvis(bot *tgbotapi.BotAPI, mode string) {
-	router := JarvisRouter(bot)
+func initializeCluster(bot *tgbotapi.BotAPI, mode string) {
+	router := ClusterRouter(bot)
 	go SetupTelegramCommandHandler(&BotExtended{bot}, mode)
 
 	PORT := os.Getenv("PORT")
@@ -56,14 +56,14 @@ func initializeJarvis(bot *tgbotapi.BotAPI, mode string) {
 	router.Run(fmt.Sprintf(":%s", PORT))
 }
 
-func initializeNarnia(bot *tgbotapi.BotAPI, mode string) {
+func initializeRouter(bot *tgbotapi.BotAPI, mode string) {
 	botExtended := &BotExtended{bot}
 	botExtended.SendMessageToPrimaryTelegramGroup("[narnia initializing]")
 	SetupTelegramCommandHandler(botExtended, mode)
 }
 
-func initializeNiro(mode string) {
-	router := NiroRouter()
+func initializeNode(mode string) {
+	router := NodeRouter()
 
 	HTTPS_DOMAINS := os.Getenv("HTTPS_DOMAINS")
 
@@ -82,7 +82,7 @@ func initializeNiro(mode string) {
 }
 
 func determineMode() string {
-	DEFAULT_MODE := "jarvis"
+	DEFAULT_MODE := "cluster"
 	if len(os.Args) >= 2 {
 		return os.Args[1]
 	}
