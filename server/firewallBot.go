@@ -1,6 +1,6 @@
 package main
 
-func RouterCommandHandler(bot *BotExtended, command string, args string) string {
+func FirewallCommandHandler(bot *BotExtended, command string, args string) string {
 	// Extract the command from the Message.
 	switch command {
 	case "help":

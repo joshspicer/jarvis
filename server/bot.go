@@ -132,7 +132,7 @@ func SetupTelegramCommandHandler(bot *BotExtended, handlerMode string) {
 		case "cluster":
 			msg.Text = ClusterCommandHandler(bot, command, args)
 		case "router":
-			msg.Text = RouterCommandHandler(bot, command, args)
+			msg.Text = FirewallCommandHandler(bot, command, args)
 		default:
 			msg.Text = "[ERR] Invalid handler mode!"
 			log.Printf("Invalid handler mode %s", handlerMode)

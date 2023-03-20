@@ -4,9 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
 
-	"github.com/gin-gonic/autotls"
 	"github.com/gin-gonic/gin"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/joho/godotenv"
@@ -65,20 +63,13 @@ func initializeRouter(bot *tgbotapi.BotAPI, mode string) {
 func initializeNode(mode string) {
 	router := NodeRouter()
 
-	HTTPS_DOMAINS := os.Getenv("HTTPS_DOMAINS")
-
-	if HTTPS_DOMAINS != "" {
-		split := strings.Split(HTTPS_DOMAINS, ",")
-		log.Printf("Serving as HTTPS on one of: '%s'", HTTPS_DOMAINS)
-		log.Fatal(autotls.Run(router, split...))
-	} else {
-		PORT := os.Getenv("PORT")
-		if PORT == "" {
-			PORT = "4000"
-		}
-		log.Printf("Serving at http://localhost:%s", PORT)
-		router.Run(fmt.Sprintf(":%s", PORT))
+	PORT := os.Getenv("PORT")
+	if PORT == "" {
+		PORT = "4000"
 	}
+	log.Printf("Serving at http://localhost:%s", PORT)
+	router.Run(fmt.Sprintf(":%s", PORT))
+
 }
 
 func determineMode() string {
