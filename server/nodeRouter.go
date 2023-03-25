@@ -4,6 +4,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -57,7 +58,7 @@ func getNodeInfo(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"message":   "Hello World",
-		"modemInfo": info,
-		"signal":    signalStrength,
+		"modemInfo": strings.Join(info, " "),
+		"signal":    strings.Join(signalStrength, " "),
 	})
 }
