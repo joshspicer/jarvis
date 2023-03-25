@@ -57,8 +57,10 @@ func getNodeInfo(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message":   "Hello World",
-		"modemInfo": strings.Join(info, " "),
-		"signal":    strings.Join(signalStrength, " "),
+		"modemInfo":          strings.Join(info, " "),
+		"signal":             strings.Join(signalStrength, " "),
+		"accessoriesBattery": -1,          // Mock
+		"gpsLatitude":        12.517572,   // Mock
+		"gpsLongitude":       -69.9649462, // Mock
 	})
 }
