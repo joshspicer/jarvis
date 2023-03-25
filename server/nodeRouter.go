@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -39,25 +40,20 @@ func getNodeInfo(c *gin.Context) {
 	var mio io.ReadWriter = m
 
 	modem := at.New(mio, at.WithTimeout(2*time.Second))
+
 	info, err := modem.Command("I")
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Error getting node info",
-			"error":   err.Error(),
-		})
+		c.String(http.StatusInternalServerError, fmt.Sprintf("Error getting modem info, %s", err.Error()))
 		return
 	}
 	signalStrength, err := modem.Command("+CSQ")
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Error getting signal strength",
-			"error":   err.Error(),
-		})
+		c.String(http.StatusInternalServerError, fmt.Sprintf("Error getting signal strength, %s", err.Error()))
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"modemInfo":          strings.Join(info, " "),
+		"modemInfo":          info[0],
 		"signal":             strings.Join(signalStrength, " "),
 		"accessoriesBattery": -1,          // Mock
 		"gpsLatitude":        12.517572,   // Mock
