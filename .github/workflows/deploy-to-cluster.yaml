@@ -28,9 +28,9 @@
 name: Build and deploy jarvis to AKS
 
 on:
-  push:
-    branches:
-      - main
+  # push:
+  #   branches:
+  #     - main
   workflow_dispatch:
 
 env:
