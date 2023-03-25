@@ -14,7 +14,10 @@ require (
 	github.com/goccy/go-json v0.10.0 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.4 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.6 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
+	github.com/tarm/serial v0.0.0-20180830185346-98f6abe2eb07 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
+	github.com/warthog618/modem v0.4.0 // indirect
 	golang.org/x/arch v0.2.0 // indirect
 	golang.org/x/net v0.7.0 // indirect
 	golang.org/x/text v0.7.0 // indirect
