@@ -41,8 +41,8 @@ func getNodeInfo(c *gin.Context) {
 
 	//var info string = "ERR"
 	var signalStrength string = "ERR"
-	var gpsLatitude float32 = 12.517572
-	var gpsLongitude float32 = -69.9649462
+	var gpsLatitude float32 = -1
+	var gpsLongitude float32 = -1
 
 	//infoArr, err := modem.Command("I")
 	//if err == nil {
@@ -58,14 +58,11 @@ func getNodeInfo(c *gin.Context) {
 	// +QGPSLOC: 174111.0,4736.8397N,12218.8860W,1.5,98.7,3,224.01,0.0,0.0,260323,05
 	gpsLocationArr, err := modem.Command("+QGPSLOC?")
 	if err == nil {
-		// Convert AT latitude and longitude response
-		var tmpLatitude = convertGpsLocation(gpsLocationArr[1])
-		var tmpLongitude = convertGpsLocation(gpsLocationArr[2])
+		log.Printf("Raw GPS Location: %s", gpsLocationArr)
 
-		if tmpLatitude != -1 && tmpLongitude != -1 {
-			gpsLatitude = tmpLatitude
-			gpsLongitude = tmpLongitude
-		}
+		// Convert AT latitude and longitude response
+		gpsLatitude = convertGpsLocation(gpsLocationArr[1])
+		gpsLongitude = convertGpsLocation(gpsLocationArr[2])
 	}
 
 	c.JSON(http.StatusOK, gin.H{
@@ -100,5 +97,6 @@ func convertGpsLocation(gpsLocation string) float32 {
 		log.Println(err)
 		return -1
 	}
+	log.Printf("Parsed into float: %f", gpsLocationFloat)
 	return float32(gpsLocationFloat)
 }
