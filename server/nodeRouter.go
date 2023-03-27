@@ -39,15 +39,15 @@ func getNodeInfo(c *gin.Context) {
 
 	modem := at.New(mio, at.WithTimeout(5*time.Second))
 
-	var info string = "ERR"
+	//var info string = "ERR"
 	var signalStrength string = "ERR"
 	var gpsLatitude float32 = 12.517572
 	var gpsLongitude float32 = -69.9649462
 
-	infoArr, err := modem.Command("I")
-	if err == nil {
-		info = infoArr[0]
-	}
+	//infoArr, err := modem.Command("I")
+	//if err == nil {
+	// info = infoArr[0]
+	//}
 
 	// +CSQ: 23,99
 	signalStrengthArr, err := modem.Command("+CSQ")
@@ -69,7 +69,7 @@ func getNodeInfo(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"modemInfo":          info[0],
+		"modemInfo":          "modemInfo",
 		"signal":             signalStrength,
 		"accessoriesBattery": -1, // Mock
 		"gpsLatitude":        gpsLatitude,
