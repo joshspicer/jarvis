@@ -17,7 +17,10 @@ func ClusterRouter(bot *tgbotapi.BotAPI) *gin.Engine {
 	// Static
 	router.StaticFile("robots.txt", "./static/robots.txt")
 
+	// Meta
 	router.GET("/health", health)
+	router.GET("/whoami", Auth(), whoami)
+
 	// Knocks
 	router.POST("/welcome/:invite_code", welcome)
 	router.POST("/trustedknock", Auth(), trustedKnock)
@@ -31,7 +34,21 @@ func health(c *gin.Context) {
 	c.Header("Pragma", "no-cache")
 	c.Header("Expires", "0")
 	c.Header("X-Accel-Expires", "0")
+
 	c.String(http.StatusOK, fmt.Sprintf("healthy\n%s\n%s", version, commit))
+}
+
+func whoami(c *gin.Context) {
+	// Protected by 'TrustedHmacAuthentication' middleware
+	authenticatedUser := c.MustGet("authenticatedUser").(string)
+
+	// Set no cache headers
+	c.Header("Cache-Control", "no-cache, no-store, no-transform, must-revalidate, private, max-age=0")
+	c.Header("Pragma", "no-cache")
+	c.Header("Expires", "0")
+	c.Header("X-Accel-Expires", "0")
+
+	c.String(http.StatusOK, "Authorized: "+authenticatedUser+"\n")
 }
 
 func trustedKnock(c *gin.Context) {

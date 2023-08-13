@@ -53,9 +53,8 @@ func initializeCluster(bot *tgbotapi.BotAPI, mode string) {
 	botExtended := &BotExtended{bot}
 	go SetupTelegramCommandHandler(botExtended, mode)
 
-	botExtended.SendMessageToPrimaryTelegramGroup("[jarvis] cluster initializing")
-	botExtended.SendMessageToPrimaryTelegramGroup(fmt.Sprintf("[jarvis] %s", version))
-	botExtended.SendMessageToPrimaryTelegramGroup(fmt.Sprintf("[jarvis] %s", commit))
+	info := fmt.Sprintf("[jarvis] cluster initializing: %s, %s", version, commit)
+	botExtended.SendMessageToPrimaryTelegramGroup(info)
 
 	PORT := os.Getenv("PORT")
 	if PORT == "" {
