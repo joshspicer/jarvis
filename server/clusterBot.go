@@ -24,11 +24,12 @@ func ClusterCommandHandler(bot *BotExtended, command string, args string) string
 }
 
 func clustersHelpCommand() string {
-	return ("- /status\n")
+	return "Help Menu."
 }
 
 func clusterStatusCommand() string {
-	return time.Now().Weekday().String()
+	versionInfo := fmt.Sprintf("[jarvis] %s, %s\n", version, commit)
+	return versionInfo
 }
 
 func augustInviteCommand(args string) string {
@@ -52,7 +53,7 @@ func augustInviteCommand(args string) string {
 	}
 	expiration := time.Now().Add(time.Hour * 32)
 
-	// TODO: Acually do it.
+	// TODO: Acually do it. Add cosmos for persistence, -or- sign the token.
 
 	return fmt.Sprintf("%s has been invited %d times until %s.  Invite code: %s", name, count, expiration.Format(time.RFC822Z), uuid.String())
 }
