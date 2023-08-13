@@ -1,20 +1,20 @@
 # jarvis (v2)
 
-An assortment of microservices and home automation services/experiments. Wrapped into a friendly chatbot (named Jarvis) and hosted in an Azure Kubernetes cluster.
+An ever-changing assortment of microservices and home automation services/experiments. Wrapped into a friendly chatbot (named Jarvis) and hosted in an Azure Kubernetes cluster.
 
 ## Deploy
 
-Jarvis is hosted on Azure Kubernetes service via the [rollout spec](./rollout.yaml) in this repo. The [deploy-to-cluster.yaml](./.github/workflows/deploy-to-cluster.yaml) workflow is triggers on pushes to `main`.
+Jarvis is hosted on Azure Kubernetes service via the [rollout spec](./rollout.yaml) in this repo.  Deploy with `kubectl apply -f rollout.yaml`.
 
 ## Developing 🚀
 
-This repo is set up with a `.devcontainer.json` configuration, for development in Codespaces or Remote-Containers.
+This repo is set up with a `.devcontainer.json` configuration for development in Codespaces.
 
 Running the `Start Server` vscode task will build and run the `go` project under `./server`.
 
-The task either:
+The task requires either:
 
-- A `dev.env` environment variable file. See [example.env](./example.env) for an idea of what secrets are necessary.
+- A complete `dev.env` environment variable file. See [example.env](./example.env) for an idea of what secrets are necessary.
 
 - [Codespace repo-scoped secrets](https://docs.github.com/en/enterprise-cloud@latest/rest/codespaces/repository-secrets) for [each required secret](./example.env).
 
