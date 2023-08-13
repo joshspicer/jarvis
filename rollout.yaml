@@ -17,6 +17,7 @@ spec:
       containers:
       - name: jarvis
         image: ghcr.io/joshspicer/jarvis:latest
+        imagePullPolicy: Always
         resources:
           requests:
             cpu: 100m
@@ -55,36 +56,6 @@ spec:
             secretKeyRef:
               name: env-secrets
               key: TrustedActors
-        - name: AUGUST_API_KEY
-          valueFrom:
-            secretKeyRef:
-              name: env-secrets
-              key: AugustApiKey
-        - name: AUGUST_INSTALLID
-          valueFrom:
-            secretKeyRef:
-              name: env-secrets
-              key: AugustInstallId
-        - name: AUGUST_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: env-secrets
-              key: AugustPassword
-        - name: AUGUST_ID_TYPE
-          valueFrom:
-            secretKeyRef:
-              name: env-secrets
-              key: AugustIdType
-        - name: AUGUST_ID
-          valueFrom:
-            secretKeyRef:
-              name: env-secrets
-              key: AugustId
-        - name: AUGUST_LOCK_ID
-          valueFrom:
-            secretKeyRef:
-              name: env-secrets
-              key: AugustLockId
       volumes:
         - name: secrets-store01-inline
           csi:
@@ -113,8 +84,8 @@ spec:
   parameters:
     usePodIdentity: "false"
     useVMManagedIdentity: "true"                                   # Set to true for using managed identity
-    userAssignedIdentityID: dc34b44c-5ea3-40d3-8820-69945bc5ccde   # Set the clientID of the user-assigned managed identity to use
-    keyvaultName: jarviskv                                         # Set to the name of your key vault
+    userAssignedIdentityID: 334bf547-5989-4300-be4d-ed7a90894a03   # Set the clientID of the user-assigned managed identity to use
+    keyvaultName: secret-store-5h7SuPk389                          # Set to the name of your key vault
     objects:  |
       array:
         - |
@@ -129,24 +100,6 @@ spec:
         - |
           objectName: TrustedActors
           objectType: secret
-        - |
-          objectName: AugustApiKey
-          objectType: secret
-        - |
-          objectName: AugustInstallId
-          objectType: secret
-        - |
-          objectName: AugustPassword
-          objectType: secret
-        - |
-          objectName: AugustIdType
-          objectType: secret
-        - |
-          objectName: AugustId
-          objectType: secret
-        - |
-          objectName: AugustLockId
-          objectType: secret
     tenantId: 0ad1a6ca-bf0b-4eea-b39d-a0a369403977   # The tenant ID of the key vault
   secretObjects:
   - data:
@@ -158,18 +111,6 @@ spec:
       objectName: ValidTelegramGroups
     - key: TrustedActors
       objectName: TrustedActors
-    - key: AugustApiKey
-      objectName: AugustApiKey
-    - key: AugustInstallId
-      objectName: AugustInstallId
-    - key: AugustPassword
-      objectName: AugustPassword
-    - key: AugustIdType
-      objectName: AugustIdType
-    - key: AugustId
-      objectName: AugustId
-    - key: AugustLockId
-      objectName: AugustLockId
     secretName: env-secrets
     type: Opaque
 ---
@@ -205,161 +146,18 @@ metadata:
     cert-manager.io/cluster-issuer: letsencrypt
 spec:
   ingressClassName: nginx
-  tls:
-  - hosts:
-    - jarvis.spicer.dev
-    secretName: tls-secret-spicerdev
   rules:
   - host: jarvis.spicer.dev
     http:
       paths:
-      - path: /(.*)
-        pathType: Prefix
+      - pathType: Prefix
         backend:
           service:
             name: jarvis
             port:
               number: 80
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: willow-ingress
-  annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /$1
-    nginx.ingress.kubernetes.io/use-regex: "true"
-    nginx.ingress.kubernetes.io/limit-rpm: "5"
-    nginx.ingress.kubernetes.io/limit-rps: "2"
-    nginx.ingress.kubernetes.io/limit-burst-multiplier: "1"
-    cert-manager.io/cluster-issuer: letsencrypt
-spec:
-  ingressClassName: nginx
+        path: /(.*)
   tls:
   - hosts:
-    - willow.party
-    secretName: tls-secret-willowparty
-  rules:
-  - host: willow.party
-    http:
-      paths:
-      - path: /(.*)
-        pathType: Prefix
-        backend:
-          service:
-            name: jarvis
-            port:
-              number: 80
----
-# VVVVVVV BEDROCK VVVVVVV
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: minecraft-bedrock
-  labels:
-    role: service-config
-    app: bds
-data:
-  # Find more options at https://github.com/itzg/docker-minecraft-bedrock-server#server-properties
-  # Remove # from in front of line if changing from default values.
-  EULA: "TRUE" # Must accept EULA to use this minecraft server
-  #GAMEMODE: "survival" # Options: survival, creative, adventure
-  #DIFFICULTY: "easy" # Options: peaceful, easy, normal, hard
-  #DEFAULT_PLAYER_PERMISSION_LEVEL: "member" # Options: visitor, member, operator
-  LEVEL_NAME: "bedrock_world"
-  #LEVEL_SEED: "33480944"
-  SERVER_NAME: "SpiceCraft2"
-  #SERVER_PORT: "19132"
-  #LEVEL_TYPE: "DEFAULT" # Options: FLAT, LEGACY, DEFAULT
-  ALLOW_CHEATS: "true" # Options: true, false
-  MAX_PLAYERS: "10"
-  #PLAYER_IDLE_TIMEOUT: "30"
-  #TEXTUREPACK_REQUIRED: "false" # Options: true, false
-  #
-  ## Changing these will have a security impact
-  #ONLINE_MODE: "true" # Options: true, false (removes Xbox Live account requirements)
-  #WHITE_LIST: "false" # If enabled, need to provide a whitelist.json by your own means. 
-  #
-  ## Changing these will have a performance impact
-  #VIEW_DISTANCE: "10"
-  #TICK_DISTANCE: "4"
-  #MAX_THREADS: "8"
----
-kind: PersistentVolumeClaim
-apiVersion: v1
-metadata:
-  name: bds
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi
----
-apiVersion: apps/v1
-kind: StatefulSet
-metadata:
-  labels:
-    app: bds
-  name: bds
-spec:
-  # never more than 1 since BDS is not horizontally scalable
-  replicas: 1
-  serviceName: bds
-  selector:
-    matchLabels:
-      app: bds
-  template:
-    metadata:
-      labels:
-        app: bds
-    spec:
-      containers:
-        - name: main
-          image: itzg/minecraft-bedrock-server
-          imagePullPolicy: Always
-          envFrom:
-            - configMapRef:
-                name: minecraft-bedrock
-          volumeMounts:
-            - mountPath: /data
-              name: data
-          ports:
-            - containerPort: 19132
-              protocol: UDP
-          readinessProbe: &probe
-            exec:
-              command:
-                - mc-monitor
-                - status-bedrock
-                - --host
-                # force health check against IPv4 port
-                - 127.0.0.1
-            initialDelaySeconds: 30
-          livenessProbe: *probe
-          tty: true
-          stdin: true
-  volumeClaimTemplates:
-    - metadata:
-        name: data
-      spec:
-        accessModes:
-          - ReadWriteOnce
-        resources:
-          requests:
-            storage: 1Gi
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: bds
-spec:
-  selector:
-    app: bds
-  ports:
-    - port: 19132
-      protocol: UDP
-  # Use LoadBalancer if running on a provider that supports that
-  type: LoadBalancer
-  # or use NodePort on a non-managed system;
-  # however, you'll need to lookup port assigned to the service
-  # type: NodePort
+    - jarvis.spicer.dev
+    secretName: tls-secret
