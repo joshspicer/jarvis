@@ -50,7 +50,12 @@ func main() {
 
 func initializeCluster(bot *tgbotapi.BotAPI, mode string) {
 	router := ClusterRouter(bot)
-	go SetupTelegramCommandHandler(&BotExtended{bot}, mode)
+	botExtended := &BotExtended{bot}
+	go SetupTelegramCommandHandler(botExtended, mode)
+
+	botExtended.SendMessageToPrimaryTelegramGroup("[jarvis] cluster initializing")
+	botExtended.SendMessageToPrimaryTelegramGroup(fmt.Sprintf("[jarvis] %s", version))
+	botExtended.SendMessageToPrimaryTelegramGroup(fmt.Sprintf("[jarvis] %s", commit))
 
 	PORT := os.Getenv("PORT")
 	if PORT == "" {
