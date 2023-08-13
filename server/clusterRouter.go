@@ -48,7 +48,7 @@ func whoami(c *gin.Context) {
 	c.Header("Expires", "0")
 	c.Header("X-Accel-Expires", "0")
 
-	c.String(http.StatusOK, "Authorized: "+authenticatedUser+"\n")
+	c.String(http.StatusOK, authenticatedUser)
 }
 
 func trustedKnock(c *gin.Context) {
