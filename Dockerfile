@@ -1,4 +1,8 @@
+
 FROM golang:1.18
+
+ARG JARVIS_BUILD_COMMIT="0000"
+ARG JARVIS_BUILD_VERSION="dev"
 
 WORKDIR /usr/src/app
 
@@ -7,6 +11,8 @@ COPY go.mod go.sum ./
 RUN go mod download && go mod verify
 
 COPY . .
-RUN go build -v -o /usr/local/bin/app ./...
+RUN go build \ 
+    --ldflags "-X 'main.commit=$JARVIS_BUILD_COMMIT' -X 'main.version=$JARVIS_BUILD_VERSION'" \
+     -v -o /usr/local/bin/app ./...
 
 CMD ["app"]

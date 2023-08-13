@@ -37,6 +37,7 @@ jobs:
         goos: ${{ matrix.goos }}
         goarch: ${{ matrix.goarch }}
         goversion: "1.18"
+        ldflags: "-X 'main.commit=${{ github.sha }}' -X 'main.version=${{ needs.create-release.outputs.tag_name }}'"
         md5sum: FALSE
         sha256sum: TRUE
         project_path: "./server"
@@ -46,13 +47,14 @@ jobs:
 
   push-docker-image:
     runs-on: ubuntu-latest
+    needs: [create-release]
     permissions:
       packages: write
       contents: read
     steps:
     - uses: actions/checkout@v3
     - name: Build the Docker image
-      run: docker build -f ./Dockerfile ./server --tag jarvis:latest
+      run: docker build -f ./Dockerfile ./server --tag jarvis:latest --build-arg JARVIS_BUILD_COMMIT=${{ github.sha }} --build-arg JARVIS_BUILD_VERSION=${{ needs.create-release.outputs.tag_name }}
     - name: Log in to registry
       run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u USERNAME --password-stdin
     - name: Push image

@@ -27,11 +27,11 @@
 
 name: Build and deploy jarvis to AKS
 
-on:
+# on:
   # push:
   #   branches:
   #     - main
-  workflow_dispatch:
+  # workflow_dispatch:
 
 env:
   AZURE_CONTAINER_REGISTRY: ${{ secrets.AZURE_CONTAINER_REGISTRY }}

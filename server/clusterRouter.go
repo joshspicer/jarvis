@@ -26,7 +26,12 @@ func ClusterRouter(bot *tgbotapi.BotAPI) *gin.Engine {
 }
 
 func health(c *gin.Context) {
-	c.String(http.StatusOK, "healthy")
+	// Set no cache headers
+	c.Header("Cache-Control", "no-cache, no-store, no-transform, must-revalidate, private, max-age=0")
+	c.Header("Pragma", "no-cache")
+	c.Header("Expires", "0")
+	c.Header("X-Accel-Expires", "0")
+	c.String(http.StatusOK, fmt.Sprintf("healthy\n%s\n%s", version, commit))
 }
 
 func trustedKnock(c *gin.Context) {

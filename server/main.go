@@ -10,7 +10,14 @@ import (
 	"github.com/joho/godotenv"
 )
 
+var (
+	version = "dev"
+	commit  = "0000"
+)
+
 func main() {
+	fmt.Printf("[jarvis] %s, %s\n", version, commit)
+
 	// Get first argument to determine mode
 	mode := determineMode()
 
@@ -29,13 +36,13 @@ func main() {
 		log.Printf("Starting cluster")
 		bot := SetupTelegram()
 		initializeCluster(bot, mode)
-	case "router":
-		log.Printf("Starting router")
-		bot := SetupTelegram()
-		initializeRouter(bot, mode)
-	case "node":
-		log.Printf("Starting node")
-		initializeNode(mode)
+	// case "home":
+	// 	log.Printf("Starting home")
+	// 	bot := SetupTelegram()
+	// 	initializeHome(bot, mode)
+	// case "node":
+	// 	log.Printf("Starting node")
+	// 	initializeNode(mode)
 	default:
 		log.Fatalf("Invalid mode: %s", mode)
 	}
@@ -54,23 +61,23 @@ func initializeCluster(bot *tgbotapi.BotAPI, mode string) {
 	router.Run(fmt.Sprintf(":%s", PORT))
 }
 
-func initializeRouter(bot *tgbotapi.BotAPI, mode string) {
-	botExtended := &BotExtended{bot}
-	botExtended.SendMessageToPrimaryTelegramGroup("[narnia initializing]")
-	SetupTelegramCommandHandler(botExtended, mode)
-}
+// func initializeHome(bot *tgbotapi.BotAPI, mode string) {
+// 	botExtended := &BotExtended{bot}
+// 	botExtended.SendMessageToPrimaryTelegramGroup("[narnia initializing]")
+// 	SetupTelegramCommandHandler(botExtended, mode)
+// }
 
-func initializeNode(mode string) {
-	router := NodeRouter()
+// func initializeNode(mode string) {
+// 	router := NodeRouter()
 
-	PORT := os.Getenv("PORT")
-	if PORT == "" {
-		PORT = "4000"
-	}
-	log.Printf("Serving at http://localhost:%s", PORT)
-	router.Run(fmt.Sprintf(":%s", PORT))
+// 	PORT := os.Getenv("PORT")
+// 	if PORT == "" {
+// 		PORT = "4000"
+// 	}
+// 	log.Printf("Serving at http://localhost:%s", PORT)
+// 	router.Run(fmt.Sprintf(":%s", PORT))
 
-}
+// }
 
 func determineMode() string {
 	DEFAULT_MODE := "cluster"
