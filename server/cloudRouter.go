@@ -8,7 +8,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-func ClusterRouter(bot *tgbotapi.BotAPI) *gin.Engine {
+func CloudRouter(bot *tgbotapi.BotAPI) *gin.Engine {
 	router := gin.Default()
 
 	router.Use(BotContext(bot))
@@ -22,8 +22,8 @@ func ClusterRouter(bot *tgbotapi.BotAPI) *gin.Engine {
 	router.GET("/whoami", Auth(), whoami)
 
 	// Knocks
-	router.POST("/welcome/:invite_code", welcome)
-	router.POST("/trustedknock", Auth(), trustedKnock)
+	// router.POST("/welcome/:invite_code", welcome)
+	// router.POST("/trustedknock", Auth(), trustedKnock)
 
 	return router
 }

@@ -32,10 +32,10 @@ func main() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 	switch mode {
-	case "cluster":
-		log.Printf("Starting cluster")
+	case "cloud":
+		log.Printf("Starting cloud")
 		bot := SetupTelegram()
-		initializeCluster(bot, mode)
+		initializeCloud(bot, mode)
 	// case "home":
 	// 	log.Printf("Starting home")
 	// 	bot := SetupTelegram()
@@ -48,12 +48,12 @@ func main() {
 	}
 }
 
-func initializeCluster(bot *tgbotapi.BotAPI, mode string) {
-	router := ClusterRouter(bot)
+func initializeCloud(bot *tgbotapi.BotAPI, mode string) {
+	router := CloudRouter(bot)
 	botExtended := &BotExtended{bot}
 	go SetupTelegramCommandHandler(botExtended, mode)
 
-	info := fmt.Sprintf("[jarvis] cluster initializing: %s, %s", version, commit)
+	info := fmt.Sprintf("[jarvis] cloud initializing: %s, %s", version, commit)
 	botExtended.SendMessageToPrimaryTelegramGroup(info)
 
 	PORT := os.Getenv("PORT")
@@ -65,26 +65,8 @@ func initializeCluster(bot *tgbotapi.BotAPI, mode string) {
 	router.Run(fmt.Sprintf(":%s", PORT))
 }
 
-// func initializeHome(bot *tgbotapi.BotAPI, mode string) {
-// 	botExtended := &BotExtended{bot}
-// 	botExtended.SendMessageToPrimaryTelegramGroup("[narnia initializing]")
-// 	SetupTelegramCommandHandler(botExtended, mode)
-// }
-
-// func initializeNode(mode string) {
-// 	router := NodeRouter()
-
-// 	PORT := os.Getenv("PORT")
-// 	if PORT == "" {
-// 		PORT = "4000"
-// 	}
-// 	log.Printf("Serving at http://localhost:%s", PORT)
-// 	router.Run(fmt.Sprintf(":%s", PORT))
-
-// }
-
 func determineMode() string {
-	DEFAULT_MODE := "cluster"
+	DEFAULT_MODE := "cloud"
 	if len(os.Args) >= 2 {
 		return os.Args[1]
 	}
