@@ -13,7 +13,7 @@ import (
 	"github.com/warthog618/modem/serial"
 )
 
-func NodeRouter() *gin.Engine {
+func FieldNodeRouter() *gin.Engine {
 	router := gin.Default()
 
 	// Static

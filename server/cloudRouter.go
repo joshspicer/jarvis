@@ -21,6 +21,8 @@ func CloudRouter(bot *tgbotapi.BotAPI) *gin.Engine {
 	router.GET("/health", health)
 	router.GET("/whoami", Auth(), whoami)
 
+	router.POST("/heartbeat", Auth(), sentryHeartbeatHandler)
+
 	// Knocks
 	// router.POST("/welcome/:invite_code", welcome)
 	// router.POST("/trustedknock", Auth(), trustedKnock)
@@ -49,6 +51,35 @@ func whoami(c *gin.Context) {
 	c.Header("X-Accel-Expires", "0")
 
 	c.String(http.StatusOK, authenticatedUser)
+}
+
+func sentryHeartbeatHandler(c *gin.Context) {
+	// Protected by 'TrustedHmacAuthentication' middleware
+	authenticatedUser := c.MustGet("authenticatedUser").(string)
+
+	// Set no cache headers
+	c.Header("Cache-Control", "no-cache, no-store, no-transform, must-revalidate, private, max-age=0")
+	c.Header("Pragma", "no-cache")
+	c.Header("Expires", "0")
+	c.Header("X-Accel-Expires", "0")
+
+	// Parse JSON
+	var heartbeat Heartbeat
+	if err := c.ShouldBindJSON(&heartbeat); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// TEMP: Send to Telegram
+	bot := c.MustGet(BOT_CONTEXT).(*BotExtended)
+	bot.SendMessageToPrimaryTelegramGroup(fmt.Sprintf("Heartbeat from '%s' on '%s' at %d", authenticatedUser, heartbeat.HostName, heartbeat.Timestamp))
+
+	// Accept if we have not aborted.
+	if !c.IsAborted() {
+		var response HeartbeatResponse
+		response.accepted = true
+		c.JSON(http.StatusAccepted, response)
+	}
 }
 
 func trustedKnock(c *gin.Context) {
