@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/hmac"
 	"crypto/sha256"
+	"crypto/subtle"
 	"encoding/hex"
 	"fmt"
 	"math"
@@ -110,11 +111,14 @@ func Auth() gin.HandlerFunc {
 				sha256.New,
 				[]byte(actor.secret))
 			h.Write([]byte(nonce))
-			computedHash := hex.EncodeToString(h.Sum(nil))
+
+			computedHash := []byte(hex.EncodeToString(h.Sum(nil)))
+			authHeader := []byte(authHeader)
 
 			// fmt.Printf("\nsecret: %s \ncomputed: %s \nexpected: %s \n\n", actor.secret, computedHash, authHeader)
 
-			if computedHash == authHeader {
+			valid := subtle.ConstantTimeCompare(computedHash, authHeader) == 1 // ConstantTimeCompare returns 1 if the two slices, x and y, have equal contents and 0 otherwise.
+			if valid {
 				matchStr := fmt.Sprintf("✅ Hash match: %s\n", actor.name)
 				fmt.Println(matchStr)
 				if hasBot {
