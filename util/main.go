@@ -1,4 +1,4 @@
-package utilties
+package main
 
 import (
 	"crypto/hmac"
@@ -11,17 +11,31 @@ import (
 	"github.com/google/uuid"
 )
 
+func usageAndExit() {
+	fmt.Printf("Usage: %s <mode> <secret> <endpoint>\n", os.Args[0])
+	os.Exit(1)
+}
+
 func main() {
+	if len(os.Args) < 2 {
+		usageAndExit()
+	}
+
 	switch os.Args[1] {
 	case "hmac":
 		generateAuthHeader()
-
+	default:
+		usageAndExit()
 	}
 }
 
 func generateAuthHeader() {
-	endpoint := os.Args[2]
-	secret := os.Args[3]
+	if len(os.Args) < 4 {
+		usageAndExit()
+	}
+
+	secret := os.Args[2]
+	endpoint := os.Args[3]
 
 	timestamp := time.Now().Unix()
 	uuid, _ := uuid.NewRandom()
@@ -37,6 +51,5 @@ func generateAuthHeader() {
 	fmt.Printf("%s\n", nonce)
 	fmt.Printf("%s\n", auth)
 	fmt.Println()
-
 	fmt.Printf("curl http://127.0.0.1:4000/%s -H 'Authorization: %s' -H 'X-Jarvis-Timestamp: %s'\n", endpoint, auth, nonce)
 }
