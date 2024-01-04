@@ -19,13 +19,13 @@ var (
 func main() {
 	fmt.Printf("[jarvis] %s, %s\n", version, commit)
 
-	// Get first argument to determine mode
-	mode := determineMode()
-
 	err := godotenv.Load()
 	if err != nil {
 		log.Printf("NOTE: No .env file loaded\n")
 	}
+
+	// Get first argument to determine mode
+	mode := determineMode()
 
 	_, isRelease := os.LookupEnv("RELEASE")
 	if isRelease {
@@ -97,6 +97,7 @@ func determineMode() string {
 		return os.Args[1]
 	}
 	mode := os.Getenv("JARVIS_MODE")
+	fmt.Printf("Mode: %s\n", mode)
 	if mode != "" {
 		return mode
 	}
