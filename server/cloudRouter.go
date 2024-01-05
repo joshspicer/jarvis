@@ -70,16 +70,21 @@ func sentryHeartbeatHandler(c *gin.Context) {
 		return
 	}
 
-	// TEMP: Send to Telegram
-	bot := c.MustGet(BOT_CONTEXT).(*BotExtended)
-	bot.SendMessageToPrimaryTelegramGroup(fmt.Sprintf("Heartbeat from '%s' on '%s' at %d", authenticatedUser, heartbeat.HostName, heartbeat.Timestamp))
+	if heartbeat.Code > 0 {
+		bot := c.MustGet(BOT_CONTEXT).(*BotExtended)
+		bot.SendMessageToPrimaryTelegramGroup(fmt.Sprintf("Heartbeat from '%s' on '%s' at %d", authenticatedUser, heartbeat.HostName, heartbeat.Timestamp))
+	}
 
 	// Accept if we have not aborted.
 	if !c.IsAborted() {
 		var response HeartbeatResponse
-		response.accepted = true
+		response.Accepted = true
 		c.JSON(http.StatusAccepted, response)
+		return
 	}
+
+	// Reject if down here
+	c.Status(http.StatusInternalServerError)
 }
 
 func trustedKnock(c *gin.Context) {

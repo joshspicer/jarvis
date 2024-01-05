@@ -20,13 +20,24 @@ type Heartbeat struct {
 	Id        string `json:"id"`
 	Timestamp int64  `json:"timestamp"`
 	HostName  string `json:"hostname"`
+	Code      Code   `json:"code"`
 }
 
 type HeartbeatResponse struct {
-	accepted bool
+	Accepted bool `json:"accepted"`
 }
 
-func (s Sentry) DoHeartbeat() {
+// Enum of codes
+type Code int
+
+const (
+	OK Code = iota
+	INITIALIZE
+	INTERRUPTED
+	ERROR
+)
+
+func (s Sentry) DoHeartbeat(code Code) {
 	hostName, err := os.Hostname()
 	if err != nil {
 		hostName = "(unknown)"
@@ -36,6 +47,7 @@ func (s Sentry) DoHeartbeat() {
 		Id:        s.Actor.name,
 		Timestamp: time.Now().Unix(),
 		HostName:  hostName,
+		Code:      code,
 	}
 	s.sendHeartbeat(values)
 }
@@ -74,7 +86,10 @@ func (s Sentry) sendHeartbeat(values Heartbeat) {
 	defer resp.Body.Close()
 
 	// Parse response
-	var res map[string]interface{}
-	json.NewDecoder(resp.Body).Decode(&res)
-	log.Println(res["json"])
+	var res HeartbeatResponse
+	err = json.NewDecoder(resp.Body).Decode(&res)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	log.Printf("[%d]:  %+v", resp.StatusCode, res)
 }

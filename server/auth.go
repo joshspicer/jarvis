@@ -43,6 +43,7 @@ func Auth() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.Request.Header.Get("Authorization")
 		nonce := c.Request.Header.Get("X-Jarvis-Timestamp")
+		release := gin.Mode() == gin.ReleaseMode
 
 		if authHeader == "" || nonce == "" {
 			c.AbortWithStatus(401)
@@ -121,9 +122,10 @@ func Auth() gin.HandlerFunc {
 			if valid {
 				matchStr := fmt.Sprintf("✅ Hash match: %s\n", actor.name)
 				fmt.Println(matchStr)
-				if hasBot {
+				if !release && hasBot {
 					bot.SendMessageToPrimaryTelegramGroup(matchStr)
 				}
+
 				c.Set("authenticatedUser", actor.name)
 				c.Next()
 

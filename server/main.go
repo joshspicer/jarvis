@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/signal"
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-co-op/gocron/v2"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/joho/godotenv"
 )
@@ -49,6 +51,8 @@ func main() {
 	default:
 		log.Fatalf("Invalid mode: %s", mode)
 	}
+
+	log.Fatalf("At end of main")
 }
 
 func initializeCloud(bot *tgbotapi.BotAPI, mode string) {
@@ -87,9 +91,50 @@ func initializeSentry() {
 		Actor:         primaryActor,
 	}
 
-	sentry.DoHeartbeat()
+	sentry.DoHeartbeat(INITIALIZE)
 
-	// TODO: sentry.Cron()
+	s, err := gocron.NewScheduler()
+	if err != nil {
+		log.Fatalf("Failed to initialize scheduler: %s\n", err)
+	}
+
+	seconds, ok := os.LookupEnv("JARVIS_HEARTBEAT_INTERVAL_SECONDS")
+	if !ok {
+		seconds = "600"
+	}
+
+	// Every X seconds
+	_, err = s.NewJob(
+		gocron.CronJob(
+			fmt.Sprintf("*/%s * * * * *", seconds),
+			true,
+		),
+		gocron.NewTask(
+			func() {
+				sentry.DoHeartbeat(OK)
+			},
+		),
+	)
+
+	if err != nil {
+		log.Fatalf("Failed to initialize job: %s\n", err)
+	}
+
+	fmt.Printf("Scheduled heartbeat every '%s' seconds\n", seconds)
+
+	s.Start()
+
+	// Catch an exit signal and run cleanup
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	go func() {
+		<-c
+		sentry.DoHeartbeat(INTERRUPTED)
+		log.Fatalln("\n[jarvis] Interrupted...")
+	}()
+
+	// Keep alive
+	select {}
 }
 
 func determineMode() string {
