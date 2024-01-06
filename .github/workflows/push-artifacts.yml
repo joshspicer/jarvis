@@ -36,7 +36,7 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         goos: ${{ matrix.goos }}
         goarch: ${{ matrix.goarch }}
-        goversion: "1.21"
+        # goversion: "1.21"
         ldflags: "-X 'main.commit=${{ github.sha }}' -X 'main.version=${{ needs.create-release.outputs.tag_name }}'"
         md5sum: FALSE
         sha256sum: TRUE
