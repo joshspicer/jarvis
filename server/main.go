@@ -6,11 +6,13 @@ import (
 	"os"
 	"os/signal"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-co-op/gocron/v2"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/joho/godotenv"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 var (
@@ -41,13 +43,6 @@ func main() {
 		initializeCloud(bot, mode)
 	case "sentry":
 		initializeSentry()
-	// case "home":
-	// 	log.Printf("Starting home")
-	// 	bot := SetupTelegram()
-	// 	initializeHome(bot, mode)
-	// case "node":
-	// 	log.Printf("Starting node")
-	// 	initializeNode(mode)
 	default:
 		log.Fatalf("Invalid mode: %s", mode)
 	}
@@ -67,6 +62,15 @@ func initializeCloud(bot *tgbotapi.BotAPI, mode string) {
 	if PORT == "" {
 		PORT = "4000"
 	}
+
+	collection, mongoCtx, cleanup := getMongoCollectionConnection("primary")
+	mongoResult := collection.FindOneAndUpdate(mongoCtx, bson.M{"type": "globalState"}, bson.M{"$set": bson.M{"cloudInitializedAt": time.Now().UTC().String()}})
+
+	if mongoResult.Err() != nil {
+		log.Fatalf("Failed to update db %s\n", mongoResult.Err())
+	}
+
+	cleanup()
 
 	log.Printf("Serving at http://localhost:%s", PORT)
 	router.Run(fmt.Sprintf(":%s", PORT))
